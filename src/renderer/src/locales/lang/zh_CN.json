@@ -1,0 +1,67 @@
+{
+  "global": {
+    "btn": {
+      "add": "新增",
+      "cancel": "取消",
+      "reload": "刷新",
+      "submit": "提交"
+    },
+    "table": {
+      "columns": {
+        "createdAt": "创建时间",
+        "updatedAt": "更新时间",
+        "deletedAt": "删除时间",
+        "actions": "操作"
+      },
+      "total": "总数: {total}"
+    },
+    "drawer": {
+      "title": {
+        "add": "新增",
+        "edit": "编辑"
+      }
+    }
+  },
+  "views": {
+    "login": {
+      "title": "登入",
+      "form": {
+        "email": "账号",
+        "password": "密码"
+      },
+      "rules": {
+        "email": {
+          "required": "请输入账号",
+          "format": "请输入正确的账号"
+        },
+        "password": {
+          "required": "请输入密码"
+        }
+      }
+    },
+    "system": {
+      "title": "系统",
+      "users": {
+        "title": "用户管理",
+        "form": {
+          "email": "账号",
+          "password": "密码",
+          "roles": "角色",
+          "enabled": "启用"
+        },
+        "rules": {
+          "email": {
+            "required": "请输入账号",
+            "format": "请输入正确的账号"
+          },
+          "password": {
+            "required": "请输入密码"
+          },
+          "roles": {
+            "required": "请选择角色"
+          }
+        }
+      }
+    }
+  }
+}
