@@ -24,7 +24,7 @@
       </div>
     </header>
     <BasicTable @register="registerTable"> </BasicTable>
-    <n-drawer v-model:show="drawerActive" width="500px" min-width="500px">
+    <n-drawer v-model:show="drawerActive" width="500px">
       <n-drawer-content :native-scrollbar="false" closable>
         <template #header>
           {{ t(`global.drawer.title.${editFlag ? 'edit' : 'add'}`) }}
