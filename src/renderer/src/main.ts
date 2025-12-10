@@ -7,7 +7,7 @@ import { setupRouterGuard } from './router/guard';
 import { setupI18n } from './locales';
 import { darken, lighten } from './utils';
 
-// import '@/styles/app.less';
+import '@/styles/app.less';
 
 const primaryColor = '#6044FF';
 const primaryColorHover: string = lighten(primaryColor, 6);
