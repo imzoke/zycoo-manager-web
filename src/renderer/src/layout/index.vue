@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider>
+  <n-layout has-sider style="height: 100vh">
     <n-layout-sider bordered>
       <div class="app-layout">
         <div class="app-sidebar">
@@ -14,7 +14,7 @@
       </div>
     </n-layout-sider>
 
-    <n-layout>
+    <n-layout :native-scrollbar="false">
       <n-layout-content>
         <router-view>
           <template #default="{ Component, route }">

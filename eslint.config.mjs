@@ -26,8 +26,11 @@ export default defineConfig(
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       'vue/require-default-prop': 'off',
       'vue/multi-word-component-names': 'off',
+      'vue/no-unused-vars': 'off',
+      'no-unused-vars': 'off',
       'vue/block-lang': [
         'error',
         {
