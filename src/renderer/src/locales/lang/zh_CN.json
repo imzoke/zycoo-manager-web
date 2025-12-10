@@ -1,17 +1,49 @@
 {
   "global": {
-    "btn": {
+    "txt": {
       "add": "新增",
       "cancel": "取消",
       "reload": "刷新",
-      "submit": "提交"
+      "submit": "提交",
+      "copy": "复制",
+      "edit": "编辑",
+
+      "search": "搜索",
+
+      "updateSuccess": "更新成功",
+      "updateFailed": "更新失败",
+
+      "createSuccess": "创建成功",
+      "createFailed": "创建失败",
+
+      "upload": "上传",
+      "dragDrop": "点击或拖拽文件到此处上传",
+      "uploadRestrictions": "严格禁止上传敏感数据或其他禁止文件",
+      "uploadFailed": "文件 {name} 上传失败",
+      "uploadSuccess": "上传成功",
+
+      "delete": "删除",
+      "deleteRoleTip": "确定要删除角色 {name} 吗？",
+      "deleteFileTip": "确定要删除这个文件吗?",
+      "confirmDelete": "确定删除吗？",
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败",
+      "linkCopied": "链接已复制",
+      "clipboardNotSupported": "剪贴板不支持",
+
+      "folder": "文件夹"
     },
     "table": {
       "columns": {
         "createdAt": "创建时间",
         "updatedAt": "更新时间",
         "deletedAt": "删除时间",
-        "actions": "操作"
+        "actions": "操作",
+        "name": "名称",
+        "size": "大小",
+        "type": "类型",
+        "lastModified": "最后修改时间",
+        "code": "代码"
       },
       "total": "总数: {total}"
     },
@@ -39,26 +71,71 @@
         }
       }
     },
+    "general": {
+      "title": "通用",
+      "dashboard": {
+        "title": "仪表盘"
+      }
+    },
+    "storage": {
+      "title": "存储",
+      "prefix": "前缀 (目录)",
+      "customDomain": "自定义域名",
+      "s3": {
+        "title": "S3存储管理"
+      },
+      "qiniu": {
+        "title": "七牛存储管理"
+      }
+    },
     "system": {
       "title": "系统",
       "users": {
         "title": "用户管理",
         "form": {
-          "email": "账号",
-          "password": "密码",
-          "roles": "角色",
-          "enabled": "启用"
-        },
-        "rules": {
           "email": {
-            "required": "请输入账号",
-            "format": "请输入正确的账号"
+            "label": "账号",
+            "placeholder": "请输入账号",
+            "rules": {
+              "required": "请输入账号",
+              "format": "请输入正确的账号"
+            }
           },
           "password": {
-            "required": "请输入密码"
+            "label": "密码",
+            "placeholder": "请输入密码",
+            "rules": {
+              "required": "请输入密码"
+            }
           },
           "roles": {
-            "required": "请选择角色"
+            "label": "角色",
+            "placeholder": "请选择角色",
+            "rules": {
+              "required": "请选择角色"
+            }
+          },
+          "enabled": {
+            "label": "启用"
+          }
+        }
+      },
+      "roles": {
+        "title": "角色管理",
+        "form": {
+          "name": {
+            "label": "名称",
+            "placeholder": "请输入名称",
+            "rules": {
+              "required": "请输入名称"
+            }
+          },
+          "code": {
+            "label": "代码",
+            "placeholder": "请输入代码",
+            "rules": {
+              "required": "请输入代码"
+            }
           }
         }
       }

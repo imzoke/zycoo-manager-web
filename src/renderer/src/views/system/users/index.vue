@@ -5,7 +5,7 @@
       <div class="controls">
         <n-flex>
           <n-button type="primary" @click="handleClickAdd">
-            {{ t('global.btn.add') }}
+            {{ t('global.txt.add') }}
           </n-button>
 
           <n-tooltip>
@@ -18,12 +18,14 @@
                 </template>
               </n-button>
             </template>
-            <span>{{ t('global.btn.reload') }}</span>
+            <span>{{ t('global.txt.reload') }}</span>
           </n-tooltip>
         </n-flex>
       </div>
     </header>
+
     <BasicTable @register="registerTable"> </BasicTable>
+
     <n-drawer v-model:show="drawerActive" width="500px">
       <n-drawer-content :native-scrollbar="false" closable>
         <template #header>
@@ -31,24 +33,24 @@
         </template>
         <template #default>
           <n-form ref="formRef" :model="formData" :rules="formRules">
-            <n-form-item :label="t('views.system.users.form.email')" path="email">
-              <n-input v-model="formData.email"></n-input>
+            <n-form-item :label="t('views.system.users.form.email.label')" path="email">
+              <n-input v-model:value="formData.email"></n-input>
             </n-form-item>
-            <n-form-item :label="t('views.system.users.form.password')" path="password">
-              <n-input v-model="formData.password" type="password"></n-input>
+            <n-form-item :label="t('views.system.users.form.password.label')" path="password">
+              <n-input v-model:value="formData.password" type="password"></n-input>
             </n-form-item>
-            <n-form-item :label="t('views.system.users.form.roles')" path="roles">
-              <n-select v-model="formData.roles" :options="roleOptions" multiple></n-select>
+            <n-form-item :label="t('views.system.users.form.roles.label')" path="roles">
+              <n-select v-model:value="formData.roles" :options="roleOptions" multiple></n-select>
             </n-form-item>
-            <n-form-item :label="t('views.system.users.form.enabled')" path="enabled">
-              <n-switch v-model="formData.enabled"></n-switch>
+            <n-form-item :label="t('views.system.users.form.enabled.label')" path="enabled">
+              <n-switch v-model:value="formData.enabled"></n-switch>
             </n-form-item>
           </n-form>
         </template>
         <template #footer>
           <n-flex>
-            <n-button @click="drawerActive = false">{{ t('global.btn.cancel') }}</n-button>
-            <n-button type="primary">{{ t('global.btn.submit') }}</n-button>
+            <n-button @click="drawerActive = false">{{ t('global.txt.cancel') }}</n-button>
+            <n-button type="primary">{{ t('global.txt.submit') }}</n-button>
           </n-flex>
         </template>
       </n-drawer-content>
@@ -83,16 +85,16 @@ const columns = [
     ifShow: false
   },
   {
-    title: t('views.system.users.form.email'),
+    title: t('views.system.users.form.email.label'),
     key: 'email'
   },
   {
-    title: t('views.system.users.form.roles'),
+    title: t('views.system.users.form.roles.label'),
     key: 'roles',
     render: (row: any) => row.roles.map((item: any) => item.name).join(',')
   },
   {
-    title: t('views.system.users.form.enabled'),
+    title: t('views.system.users.form.enabled.label'),
     key: 'enabled',
     render: (row: any) =>
       row.id !== 1 && row.email !== userInfo?.email && h(NSwitch, { value: row.enabled })
@@ -115,7 +117,7 @@ const handleClickAdd = () => {
   drawerActive.value = true;
 };
 
-const roleOptions = ref<RoleModel[]>([]);
+const roleOptions = ref<any[]>([]);
 
 const formRef = ref<FormInst | null>();
 
@@ -133,22 +135,23 @@ const formRules = computed((): FormRules => {
     email: [
       {
         required: true,
-        message: t('views.system.users.rules.email.required'),
+        message: t('views.system.users.form.email.rules.required'),
         trigger: 'blur'
       },
-      { type: 'email', message: t('views.system.users.rules.email.format'), trigger: 'blur' }
+      { type: 'email', message: t('views.system.users.form.email.rules.format'), trigger: 'blur' }
     ],
     password: [
       {
         required: !editFlag.value,
-        message: t('views.system.users.rules.password.required'),
+        message: t('views.system.users.form.password.rules.required'),
         trigger: 'blur'
       }
     ],
     roles: [
       {
+        type: 'array',
         required: true,
-        message: t('views.system.users.rules.roles.required'),
+        message: t('views.system.users.form.roles.rules.required'),
         trigger: 'change'
       }
     ]
@@ -156,8 +159,11 @@ const formRules = computed((): FormRules => {
 });
 
 onMounted(async () => {
-  roleOptions.value = await getRoleOptions();
-  console.log('roleOptions', roleOptions);
+  const data = await getRoleOptions();
+  roleOptions.value = data.map((item: RoleModel) => ({
+    label: item.name,
+    value: item.code
+  }));
 });
 </script>
 

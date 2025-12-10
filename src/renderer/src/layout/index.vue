@@ -67,7 +67,8 @@ watch(
 );
 
 async function genMenus() {
-  menus.value = await getMenus();
+  const result = await getMenus();
+  menus.value = sortMenus(result);
 
   console.log('menus.value', menus.value);
 
@@ -76,7 +77,7 @@ async function genMenus() {
       label: t(item.meta?.title),
       key: item.name,
       icon: item.meta?.icon,
-      children: item.children.map((child) => {
+      children: item.children?.map((child) => {
         return {
           label: t(child.meta?.title),
           key: child.name,
@@ -87,6 +88,22 @@ async function genMenus() {
   });
 
   console.log('menuOptions', menuOptions.value);
+}
+
+function sortMenus(menus: any[] = []) {
+  if (!menus || menus.length === 0) return [];
+  return menus
+    .sort((a, b) => {
+      const orderNoA = a.meta?.orderNo || a.orderNo || 0;
+      const orderNoB = b.meta?.orderNo || b.orderNo || 0;
+      return orderNoA - orderNoB;
+    })
+    .map((item) => {
+      if (item.children && item.children.length) {
+        item.children = sortMenus(item.children); // Recursive sort
+      }
+      return item;
+    });
 }
 
 async function initMenuOptions() {

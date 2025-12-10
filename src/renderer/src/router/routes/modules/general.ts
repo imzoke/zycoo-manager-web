@@ -1,5 +1,7 @@
 import { LAYOUT } from '@/router/constant';
 import { AppRouteModule } from '@/router/types';
+import { renderIcon } from '@/utils';
+import { Dashboard } from '@vicons/tabler';
 
 const general: AppRouteModule = {
   path: '/general',
@@ -7,7 +9,7 @@ const general: AppRouteModule = {
   component: LAYOUT,
   redirect: '/general/dashboard',
   meta: {
-    title: 'General'
+    title: 'views.general.title'
   },
   children: [
     {
@@ -15,7 +17,8 @@ const general: AppRouteModule = {
       name: 'general-dashboard',
       component: () => import('@/views/general/dashboard/index.vue'),
       meta: {
-        title: 'Dashboard'
+        title: 'views.general.dashboard.title',
+        icon: renderIcon(Dashboard)
       }
     }
   ]

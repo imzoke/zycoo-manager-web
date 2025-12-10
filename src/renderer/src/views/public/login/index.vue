@@ -25,7 +25,7 @@
           strong
           @click="handleSubmit"
         >
-          {{ t('global.btn.submit') }}
+          {{ t('global.txt.submit') }}
         </n-button>
       </n-form>
     </div>
