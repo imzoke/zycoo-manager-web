@@ -77,6 +77,48 @@
         "title": "仪表盘"
       }
     },
+    "web": {
+      "title": "网站",
+      "solutions": {
+        "title": "解决方案",
+        "form": {
+          "title": {
+            "label": "标题",
+            "placeholder": "请输入标题",
+            "rules": {
+              "required": "请输入标题"
+            }
+          },
+          "subtitle": {
+            "label": "副标题",
+            "placeholder": "请输入副标题",
+            "rules": {
+              "required": "请输入副标题"
+            }
+          },
+          "permalink": {
+            "label": "固定链接",
+            "placeholder": "请输入固定链接",
+            "rules": {
+              "required": "请输入固定链接"
+            }
+          },
+          "cover": {
+            "label": "封面",
+            "placeholder": "请输入封面地址"
+          },
+          "description": {
+            "label": "描述",
+            "placeholder": "请输入描述"
+          },
+          "content": {
+            "label": "内容",
+            "placeholder": "请输入内容"
+          }
+        },
+        "deleteTip": "确定要删除解决方案 {title} 吗？"
+      }
+    },
     "storage": {
       "title": "存储",
       "prefix": "前缀 (目录)",
