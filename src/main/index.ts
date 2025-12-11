@@ -6,8 +6,8 @@ import icon from '../../resources/icon.png?asset';
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1200,
+    height: 700,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -22,6 +22,20 @@ function createWindow(): void {
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
+    if (details.url.includes('solution-preview')) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 1260,
+          height: 720,
+          autoHideMenuBar: true,
+          webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            sandbox: false
+          }
+        }
+      };
+    }
     shell.openExternal(details.url);
     return { action: 'deny' };
   });

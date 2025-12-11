@@ -10,6 +10,8 @@
 
       "search": "搜索",
 
+      "preview": "预览",
+
       "updateSuccess": "更新成功",
       "updateFailed": "更新失败",
 
@@ -83,36 +85,53 @@
         "title": "解决方案",
         "form": {
           "title": {
-            "label": "标题",
-            "placeholder": "请输入标题",
+            "label": "网页标题",
+            "tooltip": "SEO 网页标题",
+            "placeholder": "请输入网页标题",
             "rules": {
-              "required": "请输入标题"
+              "required": "请输入网页标题"
             }
           },
-          "subtitle": {
-            "label": "副标题",
-            "placeholder": "请输入副标题",
+          "description": {
+            "label": "网页描述",
+            "tooltip": "SEO 网页描述",
+            "placeholder": "请输入网页描述",
             "rules": {
-              "required": "请输入副标题"
+              "required": "请输入网页描述"
             }
           },
           "permalink": {
             "label": "固定链接",
+            "tooltip": "固定连接地址，留空则自动使用当前时间戳。内容请使用小写英文和数字组合，使用“-”为连接符号，不可使用其它符号",
             "placeholder": "请输入固定链接",
             "rules": {
               "required": "请输入固定链接"
             }
           },
+          "subheading": {
+            "label": "主标题",
+            "tooltip": "页面正文主标题，并且会显示在列表",
+            "placeholder": "请输入主标题",
+            "rules": {
+              "required": "请输入主标题"
+            }
+          },
+          "subtitle": {
+            "label": "副标题",
+            "tooltip": "页面正文副标题，显示在主标题下方",
+            "placeholder": "请输入副标题",
+            "rules": {
+              "required": "请输入副标题"
+            }
+          },
           "cover": {
             "label": "封面",
+            "tooltip": "图片尺寸: (1920 x 1200)",
             "placeholder": "请输入封面地址"
-          },
-          "description": {
-            "label": "描述",
-            "placeholder": "请输入描述"
           },
           "content": {
             "label": "内容",
+            "tooltip": "页面正文内容",
             "placeholder": "请输入内容"
           }
         },

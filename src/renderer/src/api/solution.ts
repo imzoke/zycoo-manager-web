@@ -4,11 +4,13 @@ import { BasicPageParams, BasicFetchResult } from './model';
 export interface SolutionModel {
   id: number;
   title: string;
-  subtitle: string;
-  permalink: string;
-  cover: string;
   description: string;
+  permalink: string;
+  subheading: string;
+  subtitle: string;
+  cover: string;
   content: string;
+  src?: string;
   created_at?: string;
   updated_at?: string;
 }

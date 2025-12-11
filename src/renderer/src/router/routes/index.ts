@@ -32,4 +32,21 @@ export const LoginRoute: AppRouteRecordRaw = {
   }
 };
 
-export const basicRoutes = [RootRoute, LoginRoute, PAGE_NOT_FOUND_ROUTE, ...routeModuleList];
+export const SolutionPreviewRoute: AppRouteRecordRaw = {
+  path: '/solution-preview',
+  name: 'SolutionPreview',
+  component: () => import('@/views/web/solutions/Preview.vue'),
+  meta: {
+    title: 'Solution Preview',
+    hideMenu: true,
+    ignoreAuth: true
+  }
+};
+
+export const basicRoutes = [
+  RootRoute,
+  LoginRoute,
+  PAGE_NOT_FOUND_ROUTE,
+  SolutionPreviewRoute,
+  ...routeModuleList
+];

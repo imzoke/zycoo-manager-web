@@ -1,29 +1,30 @@
 <!doctype html>
 <html>
-
-<head>
-  <meta charset="UTF-8" />
-  <title>Electron</title>
-  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <meta http-equiv="Content-Security-Policy" content="
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electron</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
           default-src 'self';
           connect-src 'self' ws: wss: http: https: blob:;
           media-src 'self' blob: data: http: https:;
           img-src 'self' blob: data: http: https:;
 
           script-src 'self' 'unsafe-inline';
-          style-src 'self' 'unsafe-inline';
+          style-src 'self' 'unsafe-inline' https://web.zycoo.com https://cdn.jsdelivr.net https://fonts.googleapis.com;
 
           font-src 'self' data: http: https:;
           frame-src 'self';
           worker-src 'self' blob:;
 
-          object-src 'none';" />
-</head>
+          object-src 'none';"
+    />
+  </head>
 
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
-
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
