@@ -9,6 +9,8 @@ import { darken, lighten } from './utils';
 
 import '@/styles/app.less';
 
+import 'ckeditor5/ckeditor5.css';
+
 const primaryColor = '#6044FF';
 const primaryColorHover: string = lighten(primaryColor, 6);
 const primaryColorPressed: string = darken(primaryColor, 6);

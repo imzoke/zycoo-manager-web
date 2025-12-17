@@ -36,7 +36,13 @@
       </div>
     </header>
 
-    <n-data-table :columns="columns" :data="dataList" :loading="loading" />
+    <n-data-table
+      :columns="columns"
+      :data="dataList"
+      :loading="loading"
+      :pagination="pagination"
+      :max-height="`calc(100vh - 190px)`"
+    />
 
     <n-drawer
       v-model:show="drawerActive"
@@ -122,10 +128,7 @@
                   :tooltip="t('views.web.solutions.form.cover.tooltip')"
                 />
               </template>
-              <n-input
-                v-model:value="formData.cover"
-                :placeholder="t('views.web.solutions.form.cover.placeholder')"
-              />
+              <UploadComponent v-model:value="formData.cover" prefix="solution" />
             </n-form-item>
             <n-form-item path="content">
               <template #label>
@@ -134,12 +137,7 @@
                   :tooltip="t('views.web.solutions.form.content.tooltip')"
                 />
               </template>
-              <ckeditor
-                v-model="formData.content"
-                :editor="editor"
-                :config="editorConfig"
-                style="width: 100%"
-              ></ckeditor>
+              <EditorComponent v-model="formData.content" page-type="solution"></EditorComponent>
             </n-form-item>
           </n-form>
         </template>
@@ -193,128 +191,9 @@ import {
   SolutionModel
 } from '@/api/solution';
 import { useI18n } from '@/hooks/web/useI18n';
-import { Ckeditor } from '@ckeditor/ckeditor5-vue';
-import {
-  ClassicEditor,
-  GeneralHtmlSupport,
-  Alignment,
-  Bold,
-  Essentials,
-  Italic,
-  Paragraph,
-  Undo,
-  Heading,
-  FontColor,
-  FontBackgroundColor,
-  Link,
-  List,
-  BlockQuote,
-  SourceEditing,
-  Image,
-  ImageCaption,
-  ImageResize,
-  ImageStyle,
-  ImageToolbar,
-  LinkImage,
-  ImageInsert
-  // ImageUpload,
-  // ImageInsertUI
-} from 'ckeditor5';
-import 'ckeditor5/ckeditor5.css';
-import 'ckeditor5-premium-features/ckeditor5-premium-features.css';
 import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
-
-const editor = ClassicEditor;
-const editorConfig = ref({
-  htmlSupport: {
-    allow: [
-      {
-        name: /.*/,
-        attributes: true,
-        classes: true,
-        styles: true
-      }
-    ]
-  },
-  plugins: [
-    GeneralHtmlSupport,
-    Alignment,
-    Bold,
-    Essentials,
-    Italic,
-    Paragraph,
-    Undo,
-    Heading,
-    FontColor,
-    FontBackgroundColor,
-    Link,
-    List,
-    BlockQuote,
-    SourceEditing,
-    Image,
-    ImageCaption,
-    ImageResize,
-    ImageStyle,
-    ImageToolbar,
-    LinkImage,
-    ImageInsert
-    // ImageUpload,
-    // ImageInsertUI
-  ],
-  toolbar: {
-    items: [
-      'undo',
-      'redo',
-      '|',
-      'heading',
-      '|',
-      'fontColor',
-      'fontBackgroundColor',
-      '|',
-      'bold',
-      'italic',
-      'alignment',
-      '|',
-      'insertImage',
-      '|',
-      'link',
-      '|',
-      'bulletedList',
-      'numberedList',
-      '|',
-      'blockQuote',
-      'sourceEditing'
-      // '-',
-    ],
-    shouldNotGroupWhenFull: true
-  },
-  image: {
-    toolbar: [
-      'toggleImageCaption',
-      'imageStyle:inline',
-      'imageStyle:block',
-      'imageStyle:side',
-      'linkImage',
-      'imageTextAlternative'
-    ],
-    insert: {
-      // If this setting is omitted, the editor defaults to 'block'.
-      // See explanation below.
-      type: 'inline'
-    }
-  },
-  heading: {
-    options: [
-      { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-      { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
-      { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
-      { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
-      { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' },
-      { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading6' }
-    ]
-  },
-  licenseKey: 'GPL'
-});
+import UploadComponent from '@/components/Upload/index.vue';
+import EditorComponent from '@/components/Editor/index.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -330,6 +209,10 @@ const drawerActive = ref(false);
 const editFlag = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
+
+const pagination = {
+  pageSize: 20
+};
 
 interface FormData extends Omit<SolutionModel, 'id' | 'created_at' | 'updated_at'> {
   id?: number;
@@ -371,6 +254,11 @@ const rules = {
   subtitle: {
     required: true,
     message: t('views.web.solutions.form.subtitle.rules.required'),
+    trigger: 'blur'
+  },
+  cover: {
+    required: true,
+    message: t('views.web.solutions.form.cover.rules.required'),
     trigger: 'blur'
   }
 };
@@ -466,8 +354,8 @@ const handleEdit = (row: SolutionModel) => {
   formData.permalink = row.permalink;
   formData.subheading = row.subheading;
   formData.subtitle = row.subtitle;
-  formData.cover = row.cover;
-  formData.content = row.content;
+  formData.cover = row.cover.replace(/^uploads\//g, 'https://web.zycoo.com/assets/uploads/');
+  formData.content = row.content.replaceAll('src="/assets/', 'src="https://web.zycoo.com/assets/');
   drawerActive.value = true;
 };
 
@@ -483,8 +371,11 @@ const handleSubmit = () => {
             permalink: formData.permalink,
             subheading: formData.subheading,
             subtitle: formData.subtitle,
-            cover: formData.cover,
-            content: formData.content
+            cover: formData.cover.replace('https://web.zycoo.com/assets/uploads/', 'uploads/'),
+            content: formData.content.replaceAll(
+              'src="https://web.zycoo.com/assets/',
+              'src="/assets/'
+            )
           });
           message.success(t('global.txt.updateSuccess'));
         } else {
@@ -603,17 +494,5 @@ onMounted(() => {
   .ck-editor {
     width: 100%;
   }
-}
-</style>
-
-<style>
-.ck.ck-editor {
-  width: 100%;
-}
-.ck-editor__editable_inline {
-  min-height: 300px;
-}
-.ck.ck-balloon-panel {
-  z-index: 9000 !important;
 }
 </style>
