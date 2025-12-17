@@ -154,7 +154,9 @@ const customRequest = async ({ file, onFinish, onError }: UploadCustomRequestOpt
       max_height: props.maxHeight
     });
 
-    const url = res.data.url;
+    const { data } = res;
+    const url = data.data.url;
+
     emit('update:value', url);
     emit('success', url);
     onFinish();

@@ -46,7 +46,7 @@ export function uploadFile(params: {
   if (params.max_width) data.max_width = params.max_width;
   if (params.max_height) data.max_height = params.max_height;
 
-  return defHttp.uploadFile<{ url: string }>(
+  return defHttp.uploadFile<{ data: any }>(
     { url: '/storage/upload' },
     {
       file: params.file,
