@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 
 // formData
 const formData = ref<any>({
@@ -100,6 +100,15 @@ const processedData = computed(() => {
   return processSolutionContent(rawContent);
 });
 
+watch(
+  () => formData.value.title,
+  (newTitle) => {
+    if (newTitle) {
+      document.title = newTitle;
+    }
+  }
+);
+
 // 1. Slugify: 将标题转换为 ID (对应 Python 的 slugify)
 function slugify(text: string): string {
   return text
@@ -114,6 +123,11 @@ function slugify(text: string): string {
 // 2. 核心转换函数 (对应 Python 的 process_solution_content + transform_layout)
 function processSolutionContent(htmlContent: string): { html: string; nav: NavItem[] } {
   if (!htmlContent) return { html: '', nav: [] };
+
+  // 以 section 开始的 HTML，直接返回
+  if (htmlContent.startsWith('<section class="app-section">')) {
+    return { html: htmlContent, nav: [] };
+  }
 
   // 创建一个临时的 DOM 容器来解析 HTML
   const wrapper = document.createElement('div');

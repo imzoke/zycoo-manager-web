@@ -131,6 +131,7 @@ const columns: DataTableColumn[] = [
   {
     title: t('global.table.columns.type'),
     key: 'type',
+    width: 100,
     sorter: true,
     render(row: any) {
       if (row.is_back) return '-';
@@ -140,6 +141,7 @@ const columns: DataTableColumn[] = [
   {
     title: t('global.table.columns.size'),
     key: 'size',
+    width: 100,
     sorter: true,
     render(row: any) {
       if (row.is_back) return '-';
@@ -149,6 +151,7 @@ const columns: DataTableColumn[] = [
   {
     title: t('global.table.columns.lastModified'),
     key: 'last_modified',
+    width: 200,
     sorter: true,
     render(row: any) {
       if (row.is_back) return '-';
@@ -158,6 +161,7 @@ const columns: DataTableColumn[] = [
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
+    width: 100,
     render(row: any) {
       if (row.is_back) return null;
       const options = [
