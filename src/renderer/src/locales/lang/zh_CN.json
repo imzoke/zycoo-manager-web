@@ -181,9 +181,91 @@
             }
           }
         }
+      },
+      "news": {
+        "title": "新闻动态",
+        "deleteTip": "确定删除新闻“{title}”吗？",
+        "category": {
+          "title": "分类管理",
+          "deleteConfirm": "确定删除分类“{name}”吗？",
+          "columns": {
+            "name": "名称",
+            "permalink": "固定链接",
+            "index": "索引"
+          },
+          "form": {
+            "name": {
+              "label": "分类名称",
+              "tooltip": "分类展示名称",
+              "placeholder": "请输入分类名称",
+              "rules": {
+                "required": "请输入分类名称"
+              }
+            },
+            "permalink": {
+              "label": "固定链接",
+              "tooltip": "URL友好标识，仅允许小写字母、数字和连字符",
+              "placeholder": "请输入固定链接",
+              "rules": {
+                "required": "请输入固定链接"
+              }
+            },
+            "index": {
+              "label": "排序索引",
+              "tooltip": "显示顺序，数字越大越靠前，默认为0",
+              "rules": {
+                "required": "请输入排序索引"
+              }
+            }
           }
         },
-        "deleteTip": "确定要删除解决方案 {title} 吗？"
+        "form": {
+          "title": {
+            "label": "新闻标题",
+            "tooltip": "新闻标题",
+            "placeholder": "请输入新闻标题",
+            "rules": {
+              "required": "请输入新闻标题"
+            }
+          },
+          "description": {
+            "label": "新闻描述",
+            "tooltip": "新闻摘要描述",
+            "placeholder": "请输入新闻描述",
+            "rules": {
+              "required": "请输入新闻描述"
+            }
+          },
+          "permalink": {
+            "label": "固定链接",
+            "tooltip": "固定链接地址，留空则自动使用当前时间戳。内容请使用小写英文和数字组合，使用“-”为连接符号，不可使用其它符号",
+            "placeholder": "请输入固定链接",
+            "rules": {
+              "required": "请输入固定链接"
+            }
+          },
+          "cover": {
+            "label": "封面",
+            "tooltip": "图片尺寸: (1920 x 1200)",
+            "placeholder": "请输入封面地址",
+            "rules": {
+              "required": "请设置封面"
+            }
+          },
+          "content": {
+            "label": "内容",
+            "tooltip": "新闻正文内容",
+            "placeholder": "请输入内容"
+          },
+          "category": {
+            "label": "分类",
+            "tooltip": "选择所属分类",
+            "placeholder": "请选择分类",
+            "rules": {
+              "required": "请选择分类"
+            }
+          }
+        }
       }
     },
     "storage": {
