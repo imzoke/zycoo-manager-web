@@ -140,8 +140,7 @@ export class VAxios {
       method: 'POST',
       data: formData,
       headers: {
-        'Content-Type': ContentTypeEnum.FORM_DATA,
-        ignoreCancelToken: true
+        'Content-Type': ContentTypeEnum.FORM_DATA
       }
     });
   }
