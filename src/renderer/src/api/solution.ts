@@ -1,6 +1,15 @@
 import { defHttp } from '@/utils/http/axios';
 import { BasicPageParams, BasicFetchResult } from './model';
 
+export interface CategoryModel {
+  id: number;
+  name: string;
+  permalink: string;
+  index: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SolutionModel {
   id: number;
   title: string;
@@ -11,13 +20,16 @@ export interface SolutionModel {
   cover: string;
   content: string;
   src?: string;
+  category_id?: number;
+  category?: CategoryModel;
   created_at?: string;
   updated_at?: string;
 }
 
 enum Api {
   Base = '/solutions',
-  Check = '/solutions/check'
+  Check = '/solutions/check',
+  Category = '/solutions/categories'
 }
 
 export const getSolutionList = (params?: any) => {
@@ -44,4 +56,23 @@ export const deleteSolution = (id: number) => {
 
 export const checkSolution = (params: { permalink: string; id?: number }) => {
   return defHttp.get<boolean>({ url: Api.Check, params });
+};
+
+export const getCategoryList = () => {
+  return defHttp.get<CategoryModel[]>({ url: Api.Category });
+};
+
+export const createCategory = (data: Omit<CategoryModel, 'id' | 'created_at' | 'updated_at'>) => {
+  return defHttp.post<void>({ url: Api.Category, data });
+};
+
+export const updateCategory = (
+  id: number,
+  data: Partial<Omit<CategoryModel, 'id' | 'created_at' | 'updated_at'>>
+) => {
+  return defHttp.put<void>({ url: `${Api.Category}/${id}`, data });
+};
+
+export const deleteCategory = (id: number) => {
+  return defHttp.delete<void>({ url: `${Api.Category}/${id}` });
 };

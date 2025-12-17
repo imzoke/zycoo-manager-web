@@ -16,6 +16,9 @@
             </template>
             <span>{{ t('global.txt.add') }}</span>
           </n-tooltip>
+          <n-button @click="handleOpenCategoryDrawer">
+            {{ t('views.web.solutions.category.title') }}
+          </n-button>
           <n-input-group>
             <n-input
               v-model:value="searchText"
@@ -42,6 +45,7 @@
       :loading="loading"
       :pagination="pagination"
       :max-height="`calc(100vh - 190px)`"
+      @update:filters="handleFiltersChange"
     />
 
     <n-drawer
@@ -60,6 +64,20 @@
         </template>
         <template #default>
           <n-form ref="formRef" :model="formData" :rules="rules">
+            <n-form-item path="category_id">
+              <template #label>
+                <FormItemLabelWithTooltip
+                  :label="t('views.web.solutions.form.category.label')"
+                  :tooltip="t('views.web.solutions.form.category.tooltip')"
+                />
+              </template>
+              <n-select
+                v-model:value="formData.category_id"
+                :options="categoryOptions"
+                :placeholder="t('views.web.solutions.form.category.placeholder')"
+                clearable
+              />
+            </n-form-item>
             <n-form-item path="title">
               <template #label>
                 <FormItemLabelWithTooltip
@@ -128,7 +146,11 @@
                   :tooltip="t('views.web.solutions.form.cover.tooltip')"
                 />
               </template>
-              <UploadComponent v-model:value="formData.cover" prefix="solution" />
+              <UploadComponent
+                v-model:value="formData.cover"
+                :prefix="uploadPrefix"
+                @success="handleUploadSuccess"
+              />
             </n-form-item>
             <n-form-item path="content">
               <template #label>
@@ -159,12 +181,18 @@
         </template>
       </n-drawer-content>
     </n-drawer>
+    <CategoryDrawer ref="categoryDrawerRef" @close="fetchCategoryList" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, h, onMounted, reactive, watch, onUnmounted, nextTick } from 'vue';
+import { ref, h, onMounted, reactive, watch, onUnmounted, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { dateUtil } from '@/utils/date';
+
+const uploadPrefix = computed(() => {
+  return `solution/${dateUtil().format('YYMMDD')}`;
+});
 import {
   NButton,
   NDataTable,
@@ -180,20 +208,24 @@ import {
   DataTableColumn,
   NTooltip,
   NInputGroup,
-  NFlex
+  NFlex,
+  NSelect
 } from 'naive-ui';
 import { Plus, Edit, Trash, Search } from '@vicons/tabler';
+import { useI18n } from '@/hooks/web/useI18n';
+import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
+import UploadComponent from '@/components/Upload/index.vue';
+import EditorComponent from '@/components/Editor/index.vue';
+import CategoryDrawer from './components/CategoryDrawer.vue';
 import {
   getSolutionList,
   createSolution,
   updateSolution,
   deleteSolution,
-  SolutionModel
+  getCategoryList,
+  SolutionModel,
+  CategoryModel
 } from '@/api/solution';
-import { useI18n } from '@/hooks/web/useI18n';
-import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
-import UploadComponent from '@/components/Upload/index.vue';
-import EditorComponent from '@/components/Editor/index.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -204,6 +236,7 @@ const dialog = useDialog();
 const loading = ref(false);
 const dataList = ref<SolutionModel[]>([]);
 const searchText = ref('');
+const selectedCategoryId = ref<number | null>(null);
 
 const drawerActive = ref(false);
 const editFlag = ref(false);
@@ -214,8 +247,9 @@ const pagination = {
   pageSize: 20
 };
 
-interface FormData extends Omit<SolutionModel, 'id' | 'created_at' | 'updated_at'> {
+interface FormData extends Omit<SolutionModel, 'id' | 'created_at' | 'updated_at' | 'category_id'> {
   id?: number;
+  category_id?: number | undefined;
 }
 
 const defaultFormData = {
@@ -225,12 +259,19 @@ const defaultFormData = {
   subheading: '',
   subtitle: '',
   cover: '',
-  content: ''
+  content: '',
+  category_id: undefined
 };
 
 const formData = reactive<FormData>({ ...defaultFormData });
 
 const rules = {
+  category_id: {
+    type: 'number' as const,
+    required: true,
+    message: t('views.web.solutions.form.category.rules.required'),
+    trigger: ['blur', 'change']
+  },
   title: {
     required: true,
     message: t('views.web.solutions.form.title.rules.required'),
@@ -263,9 +304,20 @@ const rules = {
   }
 };
 
-const columns: DataTableColumn<SolutionModel>[] = [
+const columns = computed<DataTableColumn<SolutionModel>[]>(() => [
   { title: t('views.web.solutions.form.title.label'), key: 'title' },
   { title: t('views.web.solutions.form.permalink.label'), key: 'permalink' },
+  {
+    title: t('views.web.solutions.form.category.label'),
+    key: 'category_id',
+    render(row) {
+      return row.category?.name;
+    },
+    filter: true,
+    filterMultiple: false,
+    filterOptions: categoryOptions.value,
+    filterOptionValue: selectedCategoryId.value
+  },
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
@@ -313,7 +365,7 @@ const columns: DataTableColumn<SolutionModel>[] = [
       });
     }
   }
-];
+]);
 
 const handleClear = () => {
   nextTick(() => {
@@ -324,7 +376,10 @@ const handleClear = () => {
 const fetchData = async () => {
   loading.value = true;
   try {
-    const res: any = await getSolutionList({ title: searchText.value });
+    const res: any = await getSolutionList({
+      search: searchText.value,
+      category_id: selectedCategoryId.value || undefined
+    });
     if (res && res.items) {
       dataList.value = res.items;
     } else if (Array.isArray(res)) {
@@ -337,6 +392,15 @@ const fetchData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleFiltersChange = (filters: any) => {
+  if (filters.category_id) {
+    selectedCategoryId.value = Number(filters.category_id);
+  } else {
+    selectedCategoryId.value = null;
+  }
+  fetchData();
 };
 
 const handleAdd = () => {
@@ -354,8 +418,11 @@ const handleEdit = (row: SolutionModel) => {
   formData.permalink = row.permalink;
   formData.subheading = row.subheading;
   formData.subtitle = row.subtitle;
-  formData.cover = row.cover.replace(/^uploads\//g, 'https://web.zycoo.com/assets/uploads/');
-  formData.content = row.content.replaceAll('src="/assets/', 'src="https://web.zycoo.com/assets/');
+  formData.cover = row.cover.startsWith('http')
+    ? row.cover
+    : `https://www.zycoo.com/assets/${row.cover}`;
+  formData.content = row.content.replaceAll('src="/assets/', 'src="https://www.zycoo.com/assets/');
+  formData.category_id = row.category_id;
   drawerActive.value = true;
 };
 
@@ -371,11 +438,9 @@ const handleSubmit = () => {
             permalink: formData.permalink,
             subheading: formData.subheading,
             subtitle: formData.subtitle,
-            cover: formData.cover.replace('https://web.zycoo.com/assets/uploads/', 'uploads/'),
-            content: formData.content.replaceAll(
-              'src="https://web.zycoo.com/assets/',
-              'src="/assets/'
-            )
+            cover: formData.cover.replace('https://www.zycoo.com/assets/', ''),
+            content: formData.content,
+            category_id: formData.category_id
           });
           message.success(t('global.txt.updateSuccess'));
         } else {
@@ -471,8 +536,36 @@ onUnmounted(() => {
   }
 });
 
+const categoryDrawerRef = ref<any>(null);
+const categoryList = ref<CategoryModel[]>([]);
+const categoryOptions = computed(() => {
+  return categoryList.value.map((item) => ({
+    label: item.name,
+    value: item.id
+  }));
+});
+
+const handleOpenCategoryDrawer = () => {
+  categoryDrawerRef.value?.open();
+};
+
+const fetchCategoryList = async () => {
+  try {
+    const res = await getCategoryList();
+    categoryList.value = res || [];
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleUploadSuccess = (url: string) => {
+  console.log('url: ', url);
+  formData.cover = `${url}`;
+};
+
 onMounted(() => {
   fetchData();
+  fetchCategoryList();
 });
 </script>
 
