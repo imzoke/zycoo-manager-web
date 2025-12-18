@@ -66,7 +66,7 @@
           <n-form ref="formRef" :model="formData" :rules="rules">
             <n-form-item path="category_id">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.category.label')"
                   :tooltip="t('views.web.solutions.form.category.tooltip')"
                 />
@@ -80,7 +80,7 @@
             </n-form-item>
             <n-form-item path="title">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.title.label')"
                   :tooltip="t('views.web.solutions.form.title.tooltip')"
                 />
@@ -92,7 +92,7 @@
             </n-form-item>
             <n-form-item path="description">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.description.label')"
                   :tooltip="t('views.web.solutions.form.description.tooltip')"
                 />
@@ -105,7 +105,7 @@
             </n-form-item>
             <n-form-item path="permalink">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.permalink.label')"
                   :tooltip="t('views.web.solutions.form.permalink.tooltip')"
                 />
@@ -117,7 +117,7 @@
             </n-form-item>
             <n-form-item path="subheading">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.subheading.label')"
                   :tooltip="t('views.web.solutions.form.subheading.tooltip')"
                 />
@@ -129,7 +129,7 @@
             </n-form-item>
             <n-form-item path="subtitle">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.subtitle.label')"
                   :tooltip="t('views.web.solutions.form.subtitle.tooltip')"
                 />
@@ -141,7 +141,7 @@
             </n-form-item>
             <n-form-item path="cover">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.cover.label')"
                   :tooltip="t('views.web.solutions.form.cover.tooltip')"
                 />
@@ -154,7 +154,7 @@
             </n-form-item>
             <n-form-item path="content">
               <template #label>
-                <FormItemLabelWithTooltip
+                <LabelWithTooltip
                   :label="t('views.web.solutions.form.content.label')"
                   :tooltip="t('views.web.solutions.form.content.tooltip')"
                 />
@@ -213,7 +213,7 @@ import {
 } from 'naive-ui';
 import { Plus, Edit, Trash, Search } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
-import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
+import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
 import UploadComponent from '@/components/Upload/index.vue';
 import EditorComponent from '@/components/Editor/index.vue';
 import CategoryDrawer from './components/CategoryDrawer.vue';

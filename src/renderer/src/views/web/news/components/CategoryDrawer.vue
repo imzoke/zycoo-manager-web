@@ -31,7 +31,7 @@
       >
         <n-form-item path="name">
           <template #label>
-            <FormItemLabelWithTooltip
+            <LabelWithTooltip
               :label="t('views.web.news.category.form.name.label')"
               :tooltip="t('views.web.news.category.form.name.tooltip')"
             />
@@ -43,7 +43,7 @@
         </n-form-item>
         <n-form-item path="permalink">
           <template #label>
-            <FormItemLabelWithTooltip
+            <LabelWithTooltip
               :label="t('views.web.news.category.form.permalink.label')"
               :tooltip="t('views.web.news.category.form.permalink.tooltip')"
             />
@@ -55,7 +55,7 @@
         </n-form-item>
         <n-form-item path="index">
           <template #label>
-            <FormItemLabelWithTooltip
+            <LabelWithTooltip
               :label="t('views.web.news.category.form.index.label')"
               :tooltip="t('views.web.news.category.form.index.tooltip')"
             />
@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, h, watch } from 'vue';
-import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
+import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
 import {
   NDrawer,
   NDrawerContent,

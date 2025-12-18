@@ -1,7 +1,7 @@
 <template>
   <n-flex align="center" :size="2">
     <span>{{ label }}</span>
-    <n-tooltip>
+    <n-tooltip trigger="hover">
       <template #trigger>
         <n-icon>
           <InfoCircle />
@@ -16,7 +16,7 @@
 import { NFlex, NTooltip, NIcon } from 'naive-ui';
 import { InfoCircle } from '@vicons/tabler';
 
-const props = defineProps({
+defineProps({
   label: {
     type: String,
     required: true

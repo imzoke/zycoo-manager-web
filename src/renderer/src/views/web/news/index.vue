@@ -78,7 +78,7 @@
         >
           <n-form-item path="title">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.title.label')"
                 :tooltip="t('views.web.news.form.title.tooltip')"
               />
@@ -90,7 +90,7 @@
           </n-form-item>
           <n-form-item path="category_id">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.category.label')"
                 :tooltip="t('views.web.news.form.category.tooltip')"
               />
@@ -104,7 +104,7 @@
           </n-form-item>
           <n-form-item path="permalink">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.permalink.label')"
                 :tooltip="t('views.web.news.form.permalink.tooltip')"
               />
@@ -116,7 +116,7 @@
           </n-form-item>
           <n-form-item path="description">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.description.label')"
                 :tooltip="t('views.web.news.form.description.tooltip')"
               />
@@ -129,7 +129,7 @@
           </n-form-item>
           <n-form-item path="cover">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.cover.label')"
                 :tooltip="t('views.web.news.form.cover.tooltip')"
               />
@@ -142,7 +142,7 @@
           </n-form-item>
           <n-form-item path="content">
             <template #label>
-              <FormItemLabelWithTooltip
+              <LabelWithTooltip
                 :label="t('views.web.news.form.content.label')"
                 :tooltip="t('views.web.news.form.content.tooltip')"
               />
@@ -192,7 +192,7 @@ import { Plus, Edit, Trash, Search } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
 import UploadComponent from '@/components/Upload/index.vue';
 import EditorComponent from '@/components/Editor/index.vue';
-import FormItemLabelWithTooltip from '@/components/FormItemLabelWithTooltip/index.vue';
+import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
 import CategoryDrawer from './components/CategoryDrawer.vue';
 import {
   getNewsList,
