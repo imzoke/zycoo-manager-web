@@ -1,7 +1,7 @@
 import { LAYOUT } from '@/router/constant';
 import { AppRouteModule } from '@/router/types';
 import { renderIcon } from '@/utils';
-import { Bulb, News } from '@vicons/tabler';
+import { Ad, Bulb, News, BrandProducthunt, Download } from '@vicons/tabler';
 
 const system: AppRouteModule = {
   path: '/web',
@@ -47,6 +47,15 @@ const system: AppRouteModule = {
       meta: {
         title: 'views.web.products.title',
         icon: renderIcon(BrandProducthunt)
+      }
+    },
+    {
+      path: 'downloads',
+      name: 'web-downloads',
+      component: () => import('@/views/web/downloads/index.vue'),
+      meta: {
+        title: 'views.web.downloads.title',
+        icon: renderIcon(Download)
       }
     }
   ]

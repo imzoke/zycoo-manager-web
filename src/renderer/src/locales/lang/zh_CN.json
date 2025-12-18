@@ -361,6 +361,7 @@
           },
           "deleteConfirm": "确定要删除产品系列 {name} 吗？"
         },
+
         "form": {
           "name": {
             "label": "产品名称",
@@ -410,6 +411,105 @@
             "rules": {
               "required": "请输入排序索引"
             }
+          }
+        }
+      },
+      "downloads": {
+        "title": "下载管理",
+        "deleteConfirm": "确定要删除 {name} 吗？",
+        "category": {
+          "title": "下载分类",
+          "add": "新建分类",
+          "deleteConfirm": "确定要删除分类 {name} 吗？",
+          "form": {
+            "name": {
+              "label": "分类名称",
+              "tooltip": "下载分类的名称",
+              "placeholder": "请输入分类名称",
+              "rules": {
+                "required": "请输入分类名称"
+              }
+            },
+            "shorthand": {
+              "label": "分类标识",
+              "tooltip": "下载分类的唯一标识",
+              "placeholder": "请输入分类标识",
+              "rules": {
+                "required": "请输入分类标识"
+              }
+            }
+          }
+        },
+        "columns": {
+          "name": "名称",
+          "version": "版本",
+          "size": "大小",
+          "updated_at": "更新时间"
+        },
+        "form": {
+          "name": {
+            "label": "名称",
+            "tooltip": "下载资源的名称",
+            "placeholder": "请输入名称",
+            "rules": {
+              "required": "请输入名称"
+            }
+          },
+          "version": {
+            "label": "版本",
+            "tooltip": "下载资源的版本号",
+            "placeholder": "请输入版本号",
+            "rules": {
+              "required": "请输入版本号"
+            }
+          },
+          "src": {
+            "label": "文件上传",
+            "tooltip": "上传下载资源文件",
+            "rules": {
+              "required": "请上传文件"
+            }
+          },
+          "size": {
+            "label": "文件大小",
+            "tooltip": "文件的大小（字节）",
+            "placeholder": "请输入文件大小",
+            "rules": {
+              "required": "请输入文件大小"
+            }
+          },
+          "md5": {
+            "label": "MD5",
+            "tooltip": "文件的MD5校验和",
+            "placeholder": "请输入MD5",
+            "rules": {
+              "required": "请输入MD5"
+            }
+          },
+          "sha1": {
+            "label": "SHA1",
+            "tooltip": "文件的SHA1校验和",
+            "placeholder": "请输入SHA1",
+            "rules": {
+              "required": "请输入SHA1"
+            }
+          },
+          "category": {
+            "label": "分类",
+            "tooltip": "所属下载分类",
+            "placeholder": "请选择分类",
+            "rules": {
+              "required": "请选择分类"
+            }
+          },
+          "uploadType": {
+            "label": "添加方式",
+            "file": "本地上传",
+            "url": "外部链接"
+          },
+          "products": {
+            "label": "关联产品",
+            "tooltip": "选择此下载资源适用的产品"
           }
         }
       }
