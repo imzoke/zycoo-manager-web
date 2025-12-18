@@ -29,6 +29,7 @@
       :max-height="`calc(100vh - 190px)`"
       :row-key="(row) => row.id"
       @update:page="handlePageChange"
+      @update:page-size="handlePageSizeChange"
     />
 
     <n-drawer
@@ -151,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, h, onMounted, computed, nextTick } from 'vue';
+import { ref, reactive, h, onMounted, computed } from 'vue';
 import {
   NDataTable,
   NButton,
@@ -200,15 +201,7 @@ const pagination = reactive({
   itemCount: 0,
   showSizePicker: true,
   pageSizes: [10, 20, 50],
-  onChange: (page: number) => {
-    pagination.page = page;
-    fetchData();
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    pagination.pageSize = pageSize;
-    pagination.page = 1;
-    fetchData();
-  }
+  prefix: ({ itemCount }) => `Total ${itemCount} items`
 });
 
 const formData = reactive({
@@ -288,7 +281,7 @@ const columns = computed<DataTableColumn<BannerModel>[]>(() => [
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
-    width: 150,
+    width: 120,
     render(row) {
       return h(NSpace, null, {
         default: () => [
@@ -368,6 +361,7 @@ const handleAdd = () => {
   formData.index = 0;
   formData.is_enabled = true;
   showDrawer.value = true;
+  formData.src = '';
 };
 
 const handleEdit = (row: BannerModel) => {
@@ -440,6 +434,13 @@ const handleUploadSuccess = (url: string) => {
 
 const handlePageChange = (page: number) => {
   pagination.page = page;
+  fetchData();
+};
+
+const handlePageSizeChange = (pageSize: number) => {
+  pagination.pageSize = pageSize;
+  pagination.page = 1;
+  fetchData();
 };
 
 onMounted(() => {

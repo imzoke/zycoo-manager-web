@@ -12,7 +12,15 @@
       <div class="upload-trigger">
         <div v-if="loading" class="upload-loading">
           <n-spin size="medium" />
-          <span class="mt-2 text-gray-400">上传中...</span>
+          <span class="mt-2 text-gray-400">{{ t('global.txt.uploading') }}</span>
+          <div class="w-full mt-2 px-4">
+            <n-progress
+              type="line"
+              :percentage="uploadPercent"
+              :indicator-placement="'inside'"
+              processing
+            />
+          </div>
         </div>
         <div v-else class="upload-placeholder">
           <n-icon size="48" :depth="3">
@@ -27,9 +35,9 @@
               />
             </svg>
           </n-icon>
-          <n-text class="mt-2 text-gray-500"> 点击或拖拽文件到此处上传 </n-text>
+          <n-text class="mt-2 text-gray-500"> {{ t('global.txt.dragDrop') }} </n-text>
           <n-text depth="3" class="mt-1 text-xs text-gray-400">
-            支持 {{ accept }} 格式，最大 {{ maxSize }}MB
+            {{ t('global.txt.uploadTip', { accept, maxSize }) }}
           </n-text>
         </div>
       </div>
@@ -81,7 +89,7 @@
           </svg>
         </n-icon>
         <span class="file-url text-ellipsis">{{ value }}</span>
-        <n-button text type="error" @click="handleRemove"> 删除 </n-button>
+        <n-button text type="error" @click="handleRemove"> {{ t('global.txt.delete') }} </n-button>
       </div>
     </div>
   </div>
@@ -92,6 +100,7 @@ import { Edit, Trash } from '@vicons/tabler';
 import { ref, computed } from 'vue';
 import { useMessage, UploadCustomRequestOptions, UploadFileInfo } from 'naive-ui';
 import { uploadFile } from '@/api/storage';
+import { useI18n } from '@/hooks/web/useI18n';
 
 interface Props {
   value?: string;
@@ -100,6 +109,8 @@ interface Props {
   maxHeight?: number;
   accept?: string;
   maxSize?: number; // MB
+  mode?: number;
+  quality?: number;
 }
 
 interface Emits {
@@ -114,12 +125,16 @@ const props = withDefaults(defineProps<Props>(), {
   accept: 'image/*',
   maxSize: 5,
   maxWidth: 0,
-  maxHeight: 0
+  maxHeight: 0,
+  mode: 1,
+  quality: 80
 });
 
 const emit = defineEmits<Emits>();
 const message = useMessage();
+const { t } = useI18n();
 const loading = ref(false);
+const uploadPercent = ref(0);
 
 const isImage = computed(() => {
   if (!props.value) return false;
@@ -133,7 +148,7 @@ const beforeUpload = (data: { file: UploadFileInfo; fileList: UploadFileInfo[] }
 
   // 检查大小
   if (file.size > props.maxSize * 1024 * 1024) {
-    message.error(`文件大小不能超过 ${props.maxSize}MB`);
+    message.error(t('global.txt.fileSizeLimit', { maxSize: props.maxSize }));
     return false;
   }
 
@@ -146,12 +161,20 @@ const customRequest = async ({ file, onFinish, onError }: UploadCustomRequestOpt
   if (!file.file) return;
 
   loading.value = true;
+  uploadPercent.value = 0;
   try {
     const res = await uploadFile({
       file: file.file,
       prefix: props.prefix,
       max_width: props.maxWidth,
-      max_height: props.maxHeight
+      max_height: props.maxHeight,
+      mode: props.mode,
+      quality: props.quality,
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          uploadPercent.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        }
+      }
     });
 
     const { data } = res;
@@ -161,11 +184,12 @@ const customRequest = async ({ file, onFinish, onError }: UploadCustomRequestOpt
     emit('success', url);
     onFinish();
   } catch (err: any) {
-    message.error(err.message || '上传失败');
+    message.error(err.message || t('global.txt.uploadFail'));
     emit('error', err);
     onError();
   } finally {
     loading.value = false;
+    uploadPercent.value = 0;
   }
 };
 

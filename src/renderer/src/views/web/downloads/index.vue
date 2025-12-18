@@ -234,7 +234,7 @@ const fetchCategories = async () => {
   }
 };
 
-const loadTableData = async () => {
+const fetchData = async () => {
   loading.value = true;
   try {
     const params = {
@@ -263,7 +263,7 @@ const loadTableData = async () => {
 
 const handleSearch = () => {
   pagination.page = 1;
-  loadTableData();
+  fetchData();
 };
 
 const handleClear = () => {
@@ -274,13 +274,13 @@ const handleClear = () => {
 
 const handlePageChange = (page: number) => {
   pagination.page = page;
-  loadTableData();
+  fetchData();
 };
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.pageSize = pageSize;
   pagination.page = 1;
-  loadTableData();
+  fetchData();
 };
 
 const handleFiltersChange = (filters: any) => {
@@ -290,7 +290,7 @@ const handleFiltersChange = (filters: any) => {
     searchParams.category_id = undefined;
   }
   pagination.page = 1;
-  loadTableData();
+  fetchData();
 };
 
 const handleCreate = () => {
@@ -329,7 +329,7 @@ const handleManageCategory = () => {
 
 onMounted(() => {
   fetchCategories();
-  loadTableData();
+  fetchData();
 });
 </script>
 

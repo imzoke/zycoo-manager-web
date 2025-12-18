@@ -49,6 +49,7 @@
       :row-key="(row) => row.id"
       @update:page="handlePageChange"
       @update:filters="handleFiltersChange"
+      @update:page-size="handlePageSizeChange"
     />
 
     <ProductDrawer ref="productDrawerRef" :series-options="seriesOptions" @success="fetchData" />
@@ -83,7 +84,7 @@ import {
   ProductModel,
   ProductSeriesModel
 } from '@/api/product';
-import { formatToDateTime } from '@/utils/date';
+// import { formatToDateTime } from '@/utils/date';
 
 const { t } = useI18n();
 const message = useMessage();
@@ -104,15 +105,7 @@ const pagination = reactive({
   itemCount: 0,
   showSizePicker: true,
   pageSizes: [10, 20, 50],
-  onChange: (page: number) => {
-    pagination.page = page;
-    fetchData();
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    pagination.pageSize = pageSize;
-    pagination.page = 1;
-    fetchData();
-  }
+  prefix: ({ itemCount }) => `Total ${itemCount} items`
 });
 
 const columns = computed<DataTableColumn<ProductModel>[]>(() => [
@@ -140,7 +133,7 @@ const columns = computed<DataTableColumn<ProductModel>[]>(() => [
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
-    width: 150,
+    width: 120,
     render(row) {
       return h(NSpace, null, {
         default: () => [
@@ -279,6 +272,13 @@ const handleSeriesManage = () => {
 
 const handlePageChange = (page: number) => {
   pagination.page = page;
+  fetchData();
+};
+
+const handlePageSizeChange = (pageSize: number) => {
+  pagination.pageSize = pageSize;
+  pagination.page = 1;
+  fetchData();
 };
 
 onMounted(() => {

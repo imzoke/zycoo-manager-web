@@ -19,9 +19,13 @@
       "createFailed": "创建失败",
 
       "upload": "上传",
+      "uploading": "上传中...",
       "dragDrop": "点击或拖拽文件到此处上传",
+      "uploadTip": "支持 {accept} 格式，最大 {maxSize}MB",
       "uploadRestrictions": "严格禁止上传敏感数据或其他禁止文件",
+      "fileSizeLimit": "文件大小不能超过 {maxSize}MB",
       "uploadFailed": "文件 {name} 上传失败",
+      "uploadFail": "上传失败",
       "uploadSuccess": "上传成功",
 
       "delete": "删除",

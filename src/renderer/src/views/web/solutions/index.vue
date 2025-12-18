@@ -40,12 +40,16 @@
     </header>
 
     <n-data-table
+      remote
       :columns="columns"
       :data="dataList"
       :loading="loading"
       :pagination="pagination"
       :max-height="`calc(100vh - 190px)`"
+      :row-key="(row) => row.id"
+      @update:page="handlePageChange"
       @update:filters="handleFiltersChange"
+      @update:page-size="handlePageSizeChange"
     />
 
     <n-drawer
@@ -243,9 +247,14 @@ const editFlag = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
 
-const pagination = {
-  pageSize: 20
-};
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  showSizePicker: true,
+  pageSizes: [10, 20, 50, 100],
+  prefix: ({ itemCount }) => `Total ${itemCount} items`
+});
 
 interface FormData extends Omit<SolutionModel, 'id' | 'created_at' | 'updated_at' | 'category_id'> {
   id?: number;
@@ -321,7 +330,7 @@ const columns = computed<DataTableColumn<SolutionModel>[]>(() => [
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
-    width: 150,
+    width: 120,
     render(row) {
       return h(NSpace, null, {
         default: () => [
@@ -377,15 +386,20 @@ const fetchData = async () => {
   loading.value = true;
   try {
     const res: any = await getSolutionList({
+      page: pagination.page,
+      per_page: pagination.pageSize,
       search: searchText.value,
       category_id: selectedCategoryId.value || undefined
     });
     if (res && res.items) {
       dataList.value = res.items;
+      pagination.itemCount = res.total;
     } else if (Array.isArray(res)) {
       dataList.value = res;
+      pagination.itemCount = res.length;
     } else {
       dataList.value = [];
+      pagination.itemCount = 0;
     }
   } catch (error) {
     console.error(error);
@@ -394,12 +408,24 @@ const fetchData = async () => {
   }
 };
 
+const handlePageChange = (page: number) => {
+  pagination.page = page;
+  fetchData();
+};
+
+const handlePageSizeChange = (pageSize: number) => {
+  pagination.pageSize = pageSize;
+  pagination.page = 1;
+  fetchData();
+};
+
 const handleFiltersChange = (filters: any) => {
   if (filters.category_id) {
     selectedCategoryId.value = Number(filters.category_id);
   } else {
     selectedCategoryId.value = null;
   }
+  pagination.page = 1;
   fetchData();
 };
 
