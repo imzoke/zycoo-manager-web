@@ -161,17 +161,21 @@ const rules: FormRules = {
     message: t('views.web.products.series.form.permalink.rules.required'),
     trigger: 'blur',
     validator: async (_: any, value: string) => {
-      if (!value) return false;
-      if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value)) return false;
+      if (!value) {
+        throw new Error(t('views.web.products.series.form.permalink.rules.required'));
+      }
+      if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value)) {
+        throw new Error(t('views.web.products.series.form.permalink.rules.format'));
+      }
       try {
         const valid = await checkSeries({ id: formData.id, permalink: value });
         if (!valid) {
-          return new Error(t('views.web.products.series.form.permalink.rules.unique'));
+          throw new Error(t('views.web.products.series.form.permalink.rules.unique'));
         }
       } catch (error) {
         console.error(error);
+        throw error;
       }
-      return true;
     }
   },
   index: {
