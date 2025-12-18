@@ -39,6 +39,15 @@ const system: AppRouteModule = {
         title: 'views.web.solutions.title',
         icon: renderIcon(Bulb)
       }
+    },
+    {
+      path: 'products',
+      name: 'web-products',
+      component: () => import('@/views/web/products/index.vue'),
+      meta: {
+        title: 'views.web.products.title',
+        icon: renderIcon(BrandProducthunt)
+      }
     }
   ]
 };

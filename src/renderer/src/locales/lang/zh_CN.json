@@ -312,6 +312,106 @@
             "placeholder": "请输入描述内容"
           }
         }
+      },
+      "products": {
+        "title": "产品管理",
+        "deleteTip": "确定删除产品“{title}”吗？",
+        "series": {
+          "title": "产品系列",
+          "columns": {
+            "name": "系列名称",
+            "permalink": "固定链接",
+            "index": "排序"
+          },
+          "form": {
+            "name": {
+              "label": "系列名称",
+              "tooltip": "产品系列的名称",
+              "placeholder": "请输入系列名称",
+              "rules": {
+                "required": "请输入系列名称"
+              }
+            },
+            "permalink": {
+              "label": "固定链接",
+              "tooltip": "产品系列的固定链接",
+              "placeholder": "请输入固定链接",
+              "rules": {
+                "required": "请输入固定链接",
+                "unique": "该固定链接已存在"
+              }
+            },
+            "description": {
+              "label": "描述",
+              "tooltip": "产品系列的简要描述",
+              "placeholder": "请输入描述"
+            },
+            "icon": {
+              "label": "图标",
+              "tooltip": "产品系列的图标类名",
+              "placeholder": "请输入图标类名"
+            },
+            "index": {
+              "label": "排序",
+              "tooltip": "产品系列的显示顺序",
+              "rules": {
+                "required": "请输入排序"
+              }
+            }
+          },
+          "deleteConfirm": "确定要删除产品系列 {name} 吗？"
+        },
+        "form": {
+          "name": {
+            "label": "产品名称",
+            "tooltip": "产品显示名称",
+            "placeholder": "请输入产品名称",
+            "rules": {
+              "required": "请输入产品名称"
+            }
+          },
+          "permalink": {
+            "label": "固定链接",
+            "tooltip": "固定链接，用于URL访问",
+            "placeholder": "请输入固定链接",
+            "rules": {
+              "required": "请输入固定链接"
+            }
+          },
+          "cover": {
+            "label": "封面",
+            "tooltip": "产品封面图片",
+            "placeholder": "请输入封面地址"
+          },
+          "series": {
+            "label": "所属系列",
+            "tooltip": "产品所属的产品系列",
+            "placeholder": "请选择所属系列",
+            "rules": {
+              "required": "请选择所属系列"
+            }
+          },
+          "description": {
+            "label": "描述",
+            "tooltip": "产品简短描述",
+            "placeholder": "请输入描述",
+            "rules": {
+              "required": "请输入描述"
+            }
+          },
+          "parameter": {
+            "label": "详细参数",
+            "tooltip": "产品的详细参数配置",
+            "placeholder": "请输入详细参数"
+          },
+          "index": {
+            "label": "排序索引",
+            "tooltip": "显示顺序，数字越大越靠前",
+            "rules": {
+              "required": "请输入排序索引"
+            }
+          }
+        }
       }
     },
     "storage": {
