@@ -266,6 +266,52 @@
             }
           }
         }
+      },
+      "banner": {
+        "title": "横幅管理",
+        "deleteTip": "确定删除横幅“{title}”吗？",
+        "form": {
+          "title": {
+            "label": "标题",
+            "tooltip": "横幅显示标题",
+            "placeholder": "请输入标题",
+            "rules": {
+              "required": "请输入标题"
+            }
+          },
+          "link": {
+            "label": "链接",
+            "tooltip": "点击跳转地址",
+            "placeholder": "请输入链接",
+            "rules": {
+              "required": "请输入链接"
+            }
+          },
+          "image": {
+            "label": "图片",
+            "tooltip": "横幅图片",
+            "rules": {
+              "required": "请上传图片"
+            }
+          },
+          "index": {
+            "label": "排序索引",
+            "tooltip": "显示顺序，数字越大越靠前，数字相同则按创建时间排序",
+            "placeholder": "请输入排序索引",
+            "rules": {
+              "required": "请输入排序索引"
+            }
+          },
+          "enabled": {
+            "label": "是否启用",
+            "tooltip": "是否在前端显示"
+          },
+          "content": {
+            "label": "描述内容",
+            "tooltip": "横幅的详细描述",
+            "placeholder": "请输入描述内容"
+          }
+        }
       }
     },
     "storage": {

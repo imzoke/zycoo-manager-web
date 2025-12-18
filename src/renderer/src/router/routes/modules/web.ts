@@ -14,6 +14,15 @@ const system: AppRouteModule = {
   },
   children: [
     {
+      path: 'banner',
+      name: 'web-banner',
+      component: () => import('@/views/web/banner/index.vue'),
+      meta: {
+        title: 'views.web.banner.title',
+        icon: renderIcon(Ad)
+      }
+    },
+    {
       path: 'news',
       name: 'web-news',
       component: () => import('@/views/web/news/index.vue'),
