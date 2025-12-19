@@ -40,6 +40,7 @@
     </header>
 
     <n-data-table
+      ref="tableRef"
       remote
       :columns="columns"
       :data="dataList"
@@ -89,6 +90,8 @@ import {
 const { t } = useI18n();
 const message = useMessage();
 const dialog = useDialog();
+
+const tableRef = ref<any>(null);
 
 const searchText = ref('');
 const loading = ref(false);
@@ -273,12 +276,14 @@ const handleSeriesManage = () => {
 const handlePageChange = (page: number) => {
   pagination.page = page;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.pageSize = pageSize;
   pagination.page = 1;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 onMounted(() => {

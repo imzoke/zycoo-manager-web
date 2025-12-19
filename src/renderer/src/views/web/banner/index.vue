@@ -21,6 +21,7 @@
     </header>
 
     <n-data-table
+      ref="tableRef"
       remote
       :columns="columns"
       :data="dataList"
@@ -187,6 +188,8 @@ const uploadPrefix = computed(() => {
 const { t } = useI18n();
 const message = useMessage();
 const dialog = useDialog();
+
+const tableRef = ref<any>(null);
 
 const loading = ref(false);
 const dataList = ref<BannerModel[]>([]);
@@ -435,12 +438,14 @@ const handleUploadSuccess = (url: string) => {
 const handlePageChange = (page: number) => {
   pagination.page = page;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.pageSize = pageSize;
   pagination.page = 1;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 onMounted(() => {

@@ -40,6 +40,7 @@
     </header>
 
     <n-data-table
+      ref="tableRef"
       remote
       :columns="columns"
       :data="dataList"
@@ -96,6 +97,8 @@ const dialog = useDialog();
 
 const categoryDrawerRef = ref();
 const downloadDrawerRef = ref();
+
+const tableRef = ref<any>(null);
 
 const loading = ref(false);
 const dataList = ref<DownloadModel[]>([]);
@@ -275,12 +278,14 @@ const handleClear = () => {
 const handlePageChange = (page: number) => {
   pagination.page = page;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.pageSize = pageSize;
   pagination.page = 1;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 const handleFiltersChange = (filters: any) => {

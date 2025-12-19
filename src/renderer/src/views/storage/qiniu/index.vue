@@ -42,6 +42,7 @@
     </n-space>
 
     <n-data-table
+      ref="tableRef"
       :columns="columns"
       :data="fileList"
       :loading="loading"
@@ -49,13 +50,14 @@
       :row-props="rowProps"
       :max-height="`calc(100vh - 240px)`"
       @update:sorter="handleSorterChange"
+      @update:page="handlePageScroll"
     />
     <UploadDrawer ref="uploadDrawerRef" driver="qiniu" @success="fetchFiles" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, h, onMounted } from 'vue';
+import { ref, h, onMounted, nextTick } from 'vue';
 import {
   NButton,
   useMessage,
@@ -82,6 +84,12 @@ const domain = ref(''); // 默认域名，用户可修改
 const domainPlaceholder = ref('');
 const uploadDrawerRef = ref<any>(null);
 const { copy, isSupported } = useClipboard();
+
+const tableRef = ref<any>(null);
+const handlePageScroll = () => {
+  tableRef.value?.scrollTo({ top: 0 });
+};
+
 const { t } = useI18n();
 
 const pagination = {
@@ -252,6 +260,10 @@ const fetchFiles = async () => {
     }
 
     fileList.value = files;
+
+    nextTick(() => {
+      tableRef.value?.scrollTo({ top: 0 });
+    });
 
     // 设置 domain placeholder
     if (res.domain) {

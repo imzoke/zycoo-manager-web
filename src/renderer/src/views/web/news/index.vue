@@ -40,6 +40,7 @@
     </header>
 
     <n-data-table
+      ref="tableRef"
       remote
       :columns="columns"
       :data="dataList"
@@ -491,15 +492,19 @@ const handleUploadSuccess = (url: string) => {
   formData.cover = `${url}`;
 };
 
+const tableRef = ref<any>(null);
+
 const handlePageChange = (page: number) => {
   pagination.page = page;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 const handlePageSizeChange = (pageSize: number) => {
   pagination.pageSize = pageSize;
   pagination.page = 1;
   fetchData();
+  tableRef.value?.scrollTo({ top: 0 });
 };
 
 onMounted(() => {
