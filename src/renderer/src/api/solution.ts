@@ -28,7 +28,6 @@ export interface SolutionModel {
 
 enum Api {
   Base = '/solutions',
-  Check = '/solutions/check',
   Category = '/solutions/categories'
 }
 
@@ -55,7 +54,7 @@ export const deleteSolution = (id: number) => {
 };
 
 export const checkSolution = (params: { permalink: string; id?: number }) => {
-  return defHttp.get<boolean>({ url: Api.Check, params });
+  return defHttp.get<boolean>({ url: `${Api.Base}/check`, params });
 };
 
 export const getCategoryList = () => {
@@ -75,4 +74,8 @@ export const updateCategory = (
 
 export const deleteCategory = (id: number) => {
   return defHttp.delete<void>({ url: `${Api.Category}/${id}` });
+};
+
+export const checkCategory = (params: { permalink: string; id?: number }) => {
+  return defHttp.post<boolean>({ url: `${Api.Category}/check`, params });
 };

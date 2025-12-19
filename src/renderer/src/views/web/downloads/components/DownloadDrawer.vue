@@ -92,6 +92,66 @@
           </n-radio-group>
         </n-form-item>
 
+        <!-- Mode: File Upload - Custom Filename Field -->
+        <n-form-item v-if="uploadType === 'file'" label="文件名" required>
+          <template #label>
+            <LabelWithTooltip
+              label="文件名"
+              tooltip="请输入上传文件的名称，需包含扩展名 (例如: firmware-v1.0.zip)"
+            />
+          </template>
+          <div style="width: 100%">
+            <n-input-group>
+              <n-input
+                v-model:value="formData.filename"
+                placeholder="请输入文件名"
+                :disabled="!formData.category_id"
+                @blur="handleFilenameBlur"
+              />
+              <n-button
+                v-if="formData.category_id && formData.filename"
+                :loading="checking"
+                :type="
+                  filenameStatus === 'error'
+                    ? 'error'
+                    : filenameStatus === 'success'
+                      ? 'success'
+                      : 'default'
+                "
+                @click="checkFilenameExistence"
+              >
+                检查
+              </n-button>
+            </n-input-group>
+
+            <!-- Checks and Status -->
+            <div v-if="!formData.category_id" class="text-xs text-orange-500 mt-1">
+              请先选择下载分类
+            </div>
+            <div v-else-if="filenameError" class="text-xs text-red-500 mt-1">
+              {{ filenameError }}
+            </div>
+            <div
+              v-else-if="fileExists && !overwriteConfirmed"
+              class="text-xs text-orange-500 mt-1 flex items-center"
+            >
+              <span>文件已存在。</span>
+              <n-button text type="primary" size="tiny" class="ml-2" @click="confirmOverwrite">
+                覆盖上传
+              </n-button>
+            </div>
+            <div v-else-if="fileExists && overwriteConfirmed" class="text-xs text-green-500 mt-1">
+              已确认覆盖
+            </div>
+            <div
+              v-else-if="filenameStatus === 'success' && !fileExists"
+              class="text-xs text-green-500 mt-1"
+            >
+              文件名可用
+            </div>
+          </div>
+        </n-form-item>
+
         <n-form-item path="src">
           <template #label>
             <LabelWithTooltip
@@ -101,25 +161,16 @@
           </template>
           <!-- Mode: File Upload -->
           <div v-if="uploadType === 'file'" style="width: 100%">
-            <!-- StorageUpload Component -->
-            <StorageUpload
+            <!-- SingleUpload Component -->
+            <SingleUpload
+              ref="singleUploadRef"
               driver="s3"
               :prefix="currentCategoryShorthand"
-              :show-file-list="false"
-              @before-upload="handleBeforeUpload"
+              :custom-filename="formData.filename"
+              @file-change="handleFileParsed"
               @success="handleUploadSuccess"
               @error="handleUploadError"
-            >
-              <n-button :loading="uploading" :disabled="calculatingHash">
-                {{
-                  uploading
-                    ? t('global.txt.uploading')
-                    : calculatingHash
-                      ? 'Computing Hash...'
-                      : t('global.txt.upload')
-                }}
-              </n-button>
-            </StorageUpload>
+            />
 
             <div v-if="formData.src" style="margin-top: 8px">
               <n-input v-model:value="formData.src" readonly placeholder="URL" />
@@ -202,6 +253,7 @@ import {
   NForm,
   NFormItem,
   NInput,
+  NInputGroup,
   NInputNumber,
   NSelect,
   NFlex,
@@ -212,20 +264,20 @@ import {
   NTransfer,
   useMessage,
   FormRules,
-  SelectOption,
-  UploadFileInfo
+  SelectOption
 } from 'naive-ui';
 import { useI18n } from '@/hooks/web/useI18n';
 import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
-import StorageUpload from '@/components/StorageUpload/index.vue';
+import SingleUpload from '@/components/StorageUpload/SingleUpload.vue';
 import {
   createDownload,
   updateDownload,
   DownloadModel,
   DownloadCategoryModel
 } from '@/api/download';
+import { checkFile } from '@/api/storage';
 import { getProductListApi } from '@/api/product';
-import CryptoJS from 'crypto-js';
+import { debounce } from 'lodash-es';
 
 const { t } = useI18n();
 const message = useMessage();
@@ -245,11 +297,17 @@ const showDrawer = ref(false);
 const isEditing = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
-const uploading = ref(false);
-const calculatingHash = ref(false);
+const singleUploadRef = ref();
 
 const uploadType = ref<'file' | 'url'>('file');
 const productOptions = ref<any[]>([]);
+
+// Filename Check State
+const checking = ref(false);
+const filenameStatus = ref<'initial' | 'success' | 'error'>('initial');
+const filenameError = ref('');
+const fileExists = ref(false);
+const overwriteConfirmed = ref(false);
 
 const formData = reactive({
   id: 0,
@@ -260,7 +318,8 @@ const formData = reactive({
   src: '',
   size: 0,
   md5: '',
-  sha1: ''
+  sha1: '',
+  filename: '' // New field
 });
 
 // Compute prefix based on category
@@ -326,9 +385,18 @@ const fetchProducts = async () => {
 
 const open = async (row?: DownloadModel) => {
   showDrawer.value = true;
-  calculatingHash.value = false;
-  uploading.value = false;
   await fetchProducts();
+
+  // Reset Filename state
+  filenameStatus.value = 'initial';
+  filenameError.value = '';
+  fileExists.value = false;
+  overwriteConfirmed.value = false;
+
+  // Clear uploader
+  if (singleUploadRef.value) {
+    singleUploadRef.value.removeFile();
+  }
 
   if (row) {
     isEditing.value = true;
@@ -341,6 +409,13 @@ const open = async (row?: DownloadModel) => {
     formData.size = row.size;
     formData.md5 = row.md5;
     formData.sha1 = row.sha1;
+    // Attempt to extract filename from src if it's a file url
+    if (row.src) {
+      const parts = row.src.split('/');
+      formData.filename = parts[parts.length - 1];
+    } else {
+      formData.filename = '';
+    }
     uploadType.value = 'url';
   } else {
     isEditing.value = false;
@@ -353,58 +428,123 @@ const open = async (row?: DownloadModel) => {
     formData.size = 0;
     formData.md5 = '';
     formData.sha1 = '';
+    formData.filename = '';
     uploadType.value = 'file';
   }
 };
 
-// Calculate Hash Helper
-const calculateHash = (file: File): Promise<{ md5: string; sha1: string }> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const arrayBuffer = e.target?.result;
-      if (arrayBuffer) {
-        const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer as any);
-        const md5 = CryptoJS.MD5(wordArray).toString();
-        const sha1 = CryptoJS.SHA1(wordArray).toString();
-        resolve({ md5, sha1 });
-      } else {
-        reject(new Error('Read file failed'));
-      }
-    };
-    reader.onerror = (e) => reject(e);
-    reader.readAsArrayBuffer(file);
-  });
-};
-
-const handleBeforeUpload = async (data: { file: UploadFileInfo; fileList: UploadFileInfo[] }) => {
-  if (data.file.file) {
-    calculatingHash.value = true;
-    try {
-      formData.size = data.file.file.size;
-      const { md5, sha1 } = await calculateHash(data.file.file);
-      formData.md5 = md5;
-      formData.sha1 = sha1;
-      message.success('Hash calculated successfully');
-    } catch (e) {
-      console.error(e);
-      message.error('Failed to calculate hash');
-    } finally {
-      calculatingHash.value = false;
-      uploading.value = true;
-    }
+const validateFilename = (name: string): boolean => {
+  // Basic validation: alphanumeric, dash, underscore, dot, chinese. Must have extension.
+  if (!name) return false;
+  // Allow Chinese characters: \u4e00-\u9fa5
+  const regex = /^[a-zA-Z0-9._\-\u4e00-\u9fa5]+$/;
+  if (!regex.test(name)) {
+    filenameError.value = '文件名包含非法字符，仅允许字母、数字、中文、点、下划线和连字符';
+    return false;
+  }
+  if (!name.includes('.')) {
+    filenameError.value = '文件名必须包含扩展名';
+    return false;
   }
   return true;
 };
 
+const checkFilenameExistence = async () => {
+  if (!formData.category_id || !formData.filename) return;
+
+  if (!validateFilename(formData.filename)) {
+    filenameStatus.value = 'error';
+    return;
+  }
+
+  checking.value = true;
+  filenameError.value = '';
+
+  try {
+    // Construct Key
+    const key = `${currentCategoryShorthand.value}/${formData.filename}`;
+    const res = await checkFile({ key, driver: 's3' }); // Assume S3 for now
+
+    fileExists.value = res.exists;
+    if (res.exists) {
+      filenameStatus.value = 'error';
+      overwriteConfirmed.value = false;
+    } else {
+      filenameStatus.value = 'success';
+      overwriteConfirmed.value = false;
+    }
+  } catch (e) {
+    console.error(e);
+    filenameError.value = '检查文件出错';
+    filenameStatus.value = 'error';
+  } finally {
+    checking.value = false;
+  }
+};
+
+const handleFilenameBlur = () => {
+  if (formData.filename && formData.category_id) {
+    checkFilenameExistence();
+  }
+};
+const debouncedCheck = debounce(checkFilenameExistence, 500);
+
+watch(
+  () => formData.filename,
+  () => {
+    filenameStatus.value = 'initial';
+    filenameError.value = '';
+    fileExists.value = false;
+    overwriteConfirmed.value = false;
+    if (formData.filename) {
+      debouncedCheck();
+    }
+  }
+);
+
+watch(
+  () => formData.category_id,
+  () => {
+    if (formData.filename) {
+      debouncedCheck();
+    }
+  }
+);
+
+const confirmOverwrite = () => {
+  overwriteConfirmed.value = true;
+  filenameStatus.value = 'success'; // Allow proceed
+};
+
+// Handle parsed file from SingleUpload
+const handleFileParsed = (data: {
+  file: File | null;
+  parsed: { size: number; md5: string; sha1: string } | null;
+}) => {
+  if (data.file && data.parsed) {
+    formData.size = data.parsed.size;
+    formData.md5 = data.parsed.md5;
+    formData.sha1 = data.parsed.sha1;
+
+    // Optionally set filename if empty
+    if (!formData.filename) {
+      formData.filename = data.file.name;
+    }
+  } else {
+    // Reset if removed? User might want to keep data if replacing...
+    // Usually safer to not reset unless explicitly desired, but since it's a new file upload, maybe reset?
+    // Let's keep existing values in case they edit them manually, or reset if they want consistent state.
+    // But logic implies if file is removed, we shouldn't submit invalid data?
+    // Actually, let's leave it.
+  }
+};
+
 const handleUploadSuccess = (data: { url: string; key: string; file: File }) => {
-  uploading.value = false;
   formData.src = data.url;
   message.success(t('global.txt.uploadSuccess'));
 };
 
 const handleUploadError = () => {
-  uploading.value = false;
   message.error(t('global.txt.uploadFailed'));
 };
 

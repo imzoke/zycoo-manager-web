@@ -1,7 +1,7 @@
 <template>
   <n-drawer
     v-model:show="showDrawer"
-    width="50%"
+    width="60%"
     placement="right"
     :trap-focus="false"
     :block-scroll="false"
@@ -10,67 +10,68 @@
       <template #header>
         <n-flex justify="space-between" align="center" style="width: 100%">
           <span>{{ t('views.web.news.category.title') }}</span>
-          <n-button v-if="!isEditing" type="primary" size="small" @click="handleAdd">
+          <n-button type="primary" size="small" @click="handleAdd">
             {{ t('global.txt.add') }}
           </n-button>
         </n-flex>
       </template>
 
       <!-- Category List -->
-      <n-data-table v-if="!isEditing" :columns="columns" :data="categoryList" :loading="loading" />
+      <n-data-table :columns="columns" :data="categoryList" :loading="loading" /> </n-drawer-content
+    ><!-- Edit/Create Form Drawer -->
+    <n-drawer v-model:show="showFormDrawer" width="50%" :trap-focus="false" :block-scroll="false">
+      <n-drawer-content :title="formData.id ? t('global.txt.edit') : t('global.txt.add')">
+        <n-form
+          ref="formRef"
+          :model="formData"
+          :rules="rules"
+          label-placement="left"
+          label-width="auto"
+          require-mark-placement="right-hanging"
+        >
+          <n-form-item path="name">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.news.category.form.name.label')"
+                :tooltip="t('views.web.news.category.form.name.tooltip')"
+              />
+            </template>
+            <n-input
+              v-model:value="formData.name"
+              :placeholder="t('views.web.news.category.form.name.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="permalink">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.news.category.form.permalink.label')"
+                :tooltip="t('views.web.news.category.form.permalink.tooltip')"
+              />
+            </template>
+            <n-input
+              v-model:value="formData.permalink"
+              :placeholder="t('views.web.news.category.form.permalink.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="index">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.news.category.form.index.label')"
+                :tooltip="t('views.web.news.category.form.index.tooltip')"
+              />
+            </template>
+            <n-input-number v-model:value="formData.index" :min="0" :max="99" />
+          </n-form-item>
 
-      <!-- Edit/Create Form -->
-      <n-form
-        v-else
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-placement="left"
-        label-width="auto"
-        require-mark-placement="right-hanging"
-      >
-        <n-form-item path="name">
-          <template #label>
-            <LabelWithTooltip
-              :label="t('views.web.news.category.form.name.label')"
-              :tooltip="t('views.web.news.category.form.name.tooltip')"
-            />
-          </template>
-          <n-input
-            v-model:value="formData.name"
-            :placeholder="t('views.web.news.category.form.name.placeholder')"
-          />
-        </n-form-item>
-        <n-form-item path="permalink">
-          <template #label>
-            <LabelWithTooltip
-              :label="t('views.web.news.category.form.permalink.label')"
-              :tooltip="t('views.web.news.category.form.permalink.tooltip')"
-            />
-          </template>
-          <n-input
-            v-model:value="formData.permalink"
-            :placeholder="t('views.web.news.category.form.permalink.placeholder')"
-          />
-        </n-form-item>
-        <n-form-item path="index">
-          <template #label>
-            <LabelWithTooltip
-              :label="t('views.web.news.category.form.index.label')"
-              :tooltip="t('views.web.news.category.form.index.tooltip')"
-            />
-          </template>
-          <n-input-number v-model:value="formData.index" :min="0" :max="99" />
-        </n-form-item>
-
-        <n-flex justify="end">
-          <n-button @click="isEditing = false">{{ t('global.txt.cancel') }}</n-button>
-          <n-button type="primary" :loading="submitting" @click="handleSubmit">
-            {{ t('global.txt.submit') }}
-          </n-button>
-        </n-flex>
-      </n-form>
-    </n-drawer-content>
+          <n-flex justify="end">
+            <n-button @click="showFormDrawer = false">{{ t('global.txt.cancel') }}</n-button>
+            <n-button type="primary" :loading="submitting" @click="handleSubmit">
+              {{ t('global.txt.submit') }}
+            </n-button>
+          </n-flex>
+        </n-form>
+      </n-drawer-content>
+    </n-drawer>
   </n-drawer>
 </template>
 
@@ -101,6 +102,7 @@ import {
   createNewsCategory,
   updateNewsCategory,
   deleteNewsCategory,
+  checkCategory,
   NewsCategoryModel
 } from '@/api/news';
 
@@ -109,9 +111,9 @@ const message = useMessage();
 const dialog = useDialog();
 
 const showDrawer = ref(false);
+const showFormDrawer = ref(false);
 const loading = ref(false);
 const categoryList = ref<NewsCategoryModel[]>([]);
-const isEditing = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
 
@@ -130,11 +132,23 @@ const rules: FormRules = {
   },
   permalink: {
     required: true,
-    message: t('views.web.news.category.form.permalink.rules.required'),
     trigger: 'blur',
-    validator: (_: any, value: string) => {
-      if (!value) return false;
-      return /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value);
+    validator: async (_: any, value: string) => {
+      if (!value) {
+        return Promise.reject(Error(t('views.web.news.category.form.permalink.rules.required')));
+      }
+      if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value)) {
+        return Promise.reject(Error(t('views.web.news.category.form.permalink.rules.pattern')));
+      }
+      try {
+        const isUnique = await checkCategory({ permalink: value, id: formData.id });
+        if (!isUnique) {
+          return Promise.reject(Error(t('views.web.news.category.form.permalink.rules.unique')));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return Promise.resolve();
     }
   },
   index: {
@@ -152,6 +166,7 @@ const columns: DataTableColumn<NewsCategoryModel>[] = [
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
+    width: 120,
     render(row) {
       return h(NSpace, null, {
         default: () => [
@@ -183,7 +198,7 @@ const columns: DataTableColumn<NewsCategoryModel>[] = [
 
 const open = () => {
   showDrawer.value = true;
-  isEditing.value = false;
+  showFormDrawer.value = false;
   fetchData();
 };
 
@@ -200,7 +215,7 @@ const fetchData = async () => {
 };
 
 const handleAdd = () => {
-  isEditing.value = true;
+  showFormDrawer.value = true;
   formData.id = 0;
   formData.name = '';
   formData.permalink = '';
@@ -208,7 +223,7 @@ const handleAdd = () => {
 };
 
 const handleEdit = (row: NewsCategoryModel) => {
-  isEditing.value = true;
+  showFormDrawer.value = true;
   formData.id = row.id;
   formData.name = row.name;
   formData.permalink = row.permalink;
@@ -235,7 +250,7 @@ const handleSubmit = () => {
           });
           message.success(t('global.txt.createSuccess'));
         }
-        isEditing.value = false;
+        showFormDrawer.value = false;
         fetchData();
       } catch (error: any) {
         console.error(error);
@@ -273,6 +288,25 @@ watch(
   (val) => {
     if (!val) {
       emit('close');
+    }
+  }
+);
+
+watch(
+  () => formData.name,
+  (val) => {
+    // 仅在新增模式（ID为0）且 permalink 为空时自动生成
+    if (!formData.id && !formData.permalink && val) {
+      // 1. 转小写
+      let slug = val.toLowerCase();
+      // 2. 替换空格为 -
+      slug = slug.replace(/\s+/g, '-');
+      // 3. 移除非字母数字和 - 的字符
+      slug = slug.replace(/[^a-z0-9-]/g, '');
+      // 4. 移除首尾的 -
+      slug = slug.replace(/^-+|-+$/g, '');
+
+      formData.permalink = slug;
     }
   }
 );

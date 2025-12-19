@@ -75,6 +75,7 @@ import UploadDrawer from '../components/UploadDrawer.vue';
 import { useClipboard } from '@vueuse/core';
 import { Copy, Trash, Dots, Refresh, Upload } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
+import { formatToDateTime } from '@/utils/date';
 
 const message = useMessage();
 const dialog = useDialog();
@@ -162,7 +163,7 @@ const columns: DataTableColumn[] = [
     sorter: true,
     render(row: any) {
       if (row.is_back) return '-';
-      return row.is_dir ? '-' : row.last_modified;
+      return row.is_dir ? '-' : formatToDateTime(row.last_modified);
     }
   },
   {

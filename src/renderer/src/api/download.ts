@@ -81,3 +81,7 @@ export const deleteCategory = (id: number) => {
 export const getCategory = (id: number) => {
   return defHttp.get<DownloadCategoryModel>({ url: `${Api.Categories}/${id}` });
 };
+
+export const checkCategory = (params: { shorthand: string; id?: number }) => {
+  return defHttp.post<boolean>({ url: `${Api.Categories}/check`, params });
+};

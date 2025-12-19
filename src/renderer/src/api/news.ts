@@ -28,6 +28,10 @@ enum Api {
   Category = '/news/categories'
 }
 
+export const checkCategory = (params: { permalink: string; id?: number }) => {
+  return defHttp.post<boolean>({ url: `${Api.Category}/check`, params });
+};
+
 export const getNewsList = (params?: any) => {
   return defHttp.get<any>({ url: Api.Base, params });
 };

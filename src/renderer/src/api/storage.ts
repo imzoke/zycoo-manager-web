@@ -61,3 +61,12 @@ export function uploadFile(params: {
     }
   );
 }
+
+// 检查文件是否存在
+export function checkFile(params: { key: string; driver?: string }) {
+  return defHttp.request<{ exists: boolean }>({
+    url: '/storage/check',
+    method: 'GET',
+    params
+  });
+}

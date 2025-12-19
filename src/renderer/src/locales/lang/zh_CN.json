@@ -27,6 +27,10 @@
       "uploadFailed": "文件 {name} 上传失败",
       "uploadFail": "上传失败",
       "uploadSuccess": "上传成功",
+      "fileExists": "文件已存在",
+      "overwrite": "覆盖",
+      "startUpload": "开始上传",
+      "skipped": "已跳过",
 
       "delete": "删除",
       "deleteRoleTip": "确定要删除角色 {name} 吗？",
@@ -36,6 +40,8 @@
       "deleteFailed": "删除失败",
       "linkCopied": "链接已复制",
       "clipboardNotSupported": "剪贴板不支持",
+      "totalFiles": "共 {n} 个文件",
+      "readyToUpload": "准备上传 {n} 个",
 
       "folder": "文件夹"
     },
@@ -110,7 +116,9 @@
               "tooltip": "URL友好标识，仅允许小写字母、数字和连字符",
               "placeholder": "请输入固定链接",
               "rules": {
-                "required": "请输入固定链接"
+                "required": "请输入固定链接",
+                "pattern": "格式不正确，仅支持小写字母、数字和连字符",
+                "unique": "该固定链接已存在"
               }
             },
             "index": {
@@ -211,7 +219,9 @@
               "tooltip": "URL友好标识，仅允许小写字母、数字和连字符",
               "placeholder": "请输入固定链接",
               "rules": {
-                "required": "请输入固定链接"
+                "required": "请输入固定链接",
+                "pattern": "格式不正确，仅支持小写字母、数字和连字符",
+                "unique": "该固定链接已存在"
               }
             },
             "index": {
@@ -439,7 +449,9 @@
               "tooltip": "下载分类的唯一标识",
               "placeholder": "请输入分类标识",
               "rules": {
-                "required": "请输入分类标识"
+                "required": "请输入分类标识",
+                "pattern": "格式不正确，仅支持字母、数字和连字符",
+                "unique": "该分类标识已存在"
               }
             }
           }

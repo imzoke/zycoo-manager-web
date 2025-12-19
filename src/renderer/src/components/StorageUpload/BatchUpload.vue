@@ -4,115 +4,144 @@
       <n-upload
         ref="uploadRef"
         :default-upload="false"
-        :show-file-list="true"
+        :show-file-list="false"
         v-bind="$attrs"
         class="upload-component n-upload--dragger-inside"
         @change="handleBeforeUpload"
       >
-        <slot>
-          <n-button class="upload-btn">Upload</n-button>
-        </slot>
+        <n-upload-dragger class="upload-dragger">
+          <div class="upload-icon-wrapper">
+            <n-icon size="48" :depth="3">
+              <Archive />
+            </n-icon>
+          </div>
+          <n-text style="font-size: 16px" class="upload-text">
+            {{ t('global.txt.dragDrop') }}
+          </n-text>
+          <n-p depth="3" class="upload-tip">
+            {{ t('global.txt.uploadRestrictions') }}
+          </n-p>
+        </n-upload-dragger>
       </n-upload>
+    </div>
+
+    <!-- File Stats -->
+    <div v-if="fileList.length > 0" class="file-stats">
+      <n-text depth="3" class="text-xs">
+        {{ t('global.txt.totalFiles', { n: fileList.length }) }}
+        <span v-if="uploadableCount > 0" class="ml-2">
+          ({{ t('global.txt.readyToUpload', { n: uploadableCount }) }})
+        </span>
+      </n-text>
     </div>
 
     <!-- Custom File List -->
     <div v-if="fileList.length > 0" class="file-list-wrapper">
-      <div v-for="item in fileList" :key="item.id" class="file-item">
-        <div class="file-item-header">
-          <!-- File Info -->
-          <div class="file-info">
-            <div class="file-icon">
-              <n-icon size="20" :depth="2">
-                <FileIcon />
-              </n-icon>
-            </div>
-            <div class="file-details">
-              <div class="file-name-wrapper">
-                <n-text :type="getStatusType(item.status)" class="file-name">
-                  {{ item.name }}
-                </n-text>
+      <n-scrollbar style="max-height: 100%">
+        <div class="file-list-content">
+          <div v-for="item in fileList" :key="item.id" class="file-item">
+            <div class="file-item-header">
+              <!-- File Info -->
+              <div class="file-info">
+                <div class="file-icon">
+                  <n-icon size="20" :depth="2">
+                    <FileIcon />
+                  </n-icon>
+                </div>
+                <div class="file-details">
+                  <div class="file-name-wrapper">
+                    <n-text :type="getStatusType(item.status)" class="file-name">
+                      {{ item.name }}
+                    </n-text>
+                  </div>
+                  <n-text depth="3" class="file-size">
+                    {{ formatSize(item.size) }}
+                  </n-text>
+                </div>
               </div>
-              <n-text depth="3" class="file-size">
-                {{ formatSize(item.size) }}
-              </n-text>
+
+              <!-- Actions & Status -->
+              <div class="file-actions">
+                <template v-if="item.status === 'checking'">
+                  <n-spin size="small" />
+                </template>
+                <template v-else-if="item.status === 'exists'">
+                  <n-tag type="warning" size="small" class="status-tag">
+                    {{ t('global.txt.fileExists') }}
+                  </n-tag>
+                  <n-checkbox v-model:checked="item.overwrite" size="small">
+                    {{ t('global.txt.overwrite') }}
+                  </n-checkbox>
+                </template>
+                <template v-else-if="item.status === 'skipped'">
+                  <n-tag size="small" disabled>{{ t('global.txt.skipped') }}</n-tag>
+                </template>
+                <template v-else-if="item.status === 'success'">
+                  <n-icon size="18" color="#18a058"><CheckCircle /></n-icon>
+                </template>
+                <template v-else-if="item.status === 'error'">
+                  <n-popover trigger="hover">
+                    <template #trigger>
+                      <n-icon size="18" color="#d03050"><AlertCircle /></n-icon>
+                    </template>
+                    <span>{{ item.errorMsg || 'Upload failed' }}</span>
+                  </n-popover>
+                </template>
+
+                <n-button
+                  v-if="item.status !== 'uploading' && item.status !== 'success'"
+                  quaternary
+                  circle
+                  size="small"
+                  @click="removeFile(item.id)"
+                >
+                  <template #icon>
+                    <n-icon><Trash /></n-icon>
+                  </template>
+                </n-button>
+              </div>
+            </div>
+
+            <!-- Progress -->
+            <div v-if="item.status === 'uploading'" class="file-progress">
+              <n-progress
+                type="line"
+                :percentage="item.percent"
+                status="success"
+                processing
+                :height="4"
+                :show-indicator="false"
+              />
+              <div class="progress-info">
+                <span>{{ t('global.txt.uploading') }}</span>
+                <span>{{ item.percent }}%</span>
+              </div>
             </div>
           </div>
-
-          <!-- Actions & Status -->
-          <div class="file-actions">
-            <template v-if="item.status === 'checking'">
-              <n-spin size="small" />
-            </template>
-            <template v-else-if="item.status === 'exists'">
-              <n-tag type="warning" size="small" class="status-tag">
-                {{ t('global.txt.fileExists') }}
-              </n-tag>
-              <n-checkbox v-model:checked="item.overwrite" size="small">
-                {{ t('global.txt.overwrite') }}
-              </n-checkbox>
-            </template>
-            <template v-else-if="item.status === 'skipped'">
-              <n-tag size="small" disabled>{{ t('global.txt.skipped') }}</n-tag>
-            </template>
-            <template v-else-if="item.status === 'success'">
-              <n-icon size="18" color="#18a058"><CheckCircle /></n-icon>
-            </template>
-            <template v-else-if="item.status === 'error'">
-              <n-popover trigger="hover">
-                <template #trigger>
-                  <n-icon size="18" color="#d03050"><AlertCircle /></n-icon>
-                </template>
-                <span>{{ item.errorMsg || 'Upload failed' }}</span>
-              </n-popover>
-            </template>
-
-            <n-button
-              v-if="item.status !== 'uploading' && item.status !== 'success'"
-              quaternary
-              circle
-              size="small"
-              @click="removeFile(item.id)"
-            >
-              <template #icon>
-                <n-icon><Trash /></n-icon>
-              </template>
-            </n-button>
-          </div>
         </div>
-
-        <!-- Progress -->
-        <div v-if="item.status === 'uploading'" class="file-progress">
-          <n-progress
-            type="line"
-            :percentage="item.percent"
-            status="success"
-            processing
-            :height="4"
-            :show-indicator="false"
-          />
-          <div class="progress-info">
-            <span>{{ t('global.txt.uploading') }}</span>
-            <span>{{ item.percent }}%</span>
-          </div>
-        </div>
-      </div>
+      </n-scrollbar>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Archive } from '@vicons/tabler';
 import { ref, computed, watch, nextTick } from 'vue';
 import {
+  NIcon,
+  NText,
+  NP,
+  NUploadDragger,
   NUpload,
   NButton,
   NCheckbox,
   NProgress,
-  NText,
-  NIcon,
   NSpin,
   NTag,
   NPopover,
-  UploadFileInfo
+  NScrollbar,
+  UploadFileInfo,
+  useThemeVars
 } from 'naive-ui';
 import { Trash, File as FileIcon, Check as CheckCircle, AlertCircle } from '@vicons/tabler';
 import { getUploadToken, checkFile } from '@/api/storage';
@@ -160,6 +189,7 @@ const props = defineProps({
 
 const emit = defineEmits(['success', 'error', 'finish', 'status-change']);
 const { t } = useI18n();
+const themeVars = useThemeVars();
 
 const fileList = ref<UploadFileItem[]>([]);
 const isUploading = ref(false);
@@ -168,12 +198,15 @@ const pendingOrCheckingCount = computed(() => {
   return fileList.value.filter((f) => f.status === 'pending' || f.status === 'checking').length;
 });
 
+const uploadableCount = computed(() => {
+  return fileList.value.filter(
+    (f) => f.status === 'ready' || (f.status === 'exists' && f.overwrite) || f.status === 'error'
+  ).length;
+});
+
 const canUpload = computed(() => {
   if (fileList.value.length === 0) return false;
-  const hasUploadable = fileList.value.some(
-    (f) => f.status === 'ready' || (f.status === 'exists' && f.overwrite) || f.status === 'error'
-  );
-  return hasUploadable && !isUploading.value && pendingOrCheckingCount.value === 0;
+  return uploadableCount.value > 0 && !isUploading.value && pendingOrCheckingCount.value === 0;
 });
 
 // Watch status to emit changes to parent
@@ -218,7 +251,8 @@ const handleBeforeUpload = async (data: { file: UploadFileInfo; fileList: Upload
   if (!data.file.file) return false;
 
   const rawFile = data.file.file;
-  const filename = props.customFilename || rawFile.name;
+  // Replace spaces with underscores
+  const filename = (props.customFilename || rawFile.name).replace(/\s+/g, '_');
   const key = (props.prefix ? props.prefix : '') + filename;
 
   const newItem: UploadFileItem = {
@@ -375,32 +409,38 @@ defineExpose({ clear, startUpload });
   width: 100%;
 }
 
-.upload-btn {
-  width: 100%;
+.file-stats {
+  margin-top: 12px;
+  flex-shrink: 0;
 }
 
 .file-list-wrapper {
-  margin-top: 16px;
+  margin-top: 8px;
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
-  padding-right: 4px;
+  border: 1px solid v-bind('themeVars.borderColor');
+  border-radius: 4px;
+}
+
+.file-list-content {
+  padding: 8px;
 }
 
 .file-item {
   padding: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--n-border-color);
+  margin-bottom: 8px;
+  border: 1px solid v-bind('themeVars.borderColor');
   border-radius: 4px;
-  background-color: var(--n-color);
-  transition: box-shadow 0.3s;
+  background-color: v-bind('themeVars.cardColor');
+  transition: all 0.3s;
+}
+
+.file-item:last-child {
+  margin-bottom: 0;
 }
 
 .file-item:hover {
-  box-shadow:
-    0 1px 2px -2px rgba(0, 0, 0, 0.08),
-    0 3px 6px 0 rgba(0, 0, 0, 0.06),
-    0 5px 12px 4px rgba(0, 0, 0, 0.04);
+  background-color: v-bind('themeVars.hoverColor');
 }
 
 .file-item-header {
@@ -431,6 +471,7 @@ defineExpose({ clear, startUpload });
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
 }
 
 .file-name-wrapper {
@@ -442,9 +483,9 @@ defineExpose({ clear, startUpload });
 .file-name {
   font-weight: 500;
   font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Allow wrapping */
+  word-break: break-all;
+  white-space: normal;
 }
 
 .file-size {
@@ -471,6 +512,6 @@ defineExpose({ clear, startUpload });
   justify-content: space-between;
   font-size: 12px;
   margin-top: 4px;
-  color: #999;
+  color: v-bind('themeVars.textColor3');
 }
 </style>
