@@ -289,6 +289,76 @@
           }
         }
       },
+      "article": {
+        "title": "文章管理",
+        "deleteTip": "确定删除文章“{title}”吗？",
+        "category": {
+          "title": "分类管理",
+          "deleteConfirm": "确定删除分类“{name}”吗？",
+          "columns": {
+            "name": "名称",
+            "shorthand": "简写"
+          },
+          "form": {
+            "name": {
+              "label": "分类名称",
+              "tooltip": "分类展示名称",
+              "placeholder": "请输入分类名称",
+              "rules": {
+                "required": "请输入分类名称"
+              }
+            },
+            "shorthand": {
+              "label": "简写",
+              "tooltip": "分类简写/代码",
+              "placeholder": "请输入分类简写",
+              "rules": {
+                "required": "请输入分类简写",
+                "pattern": "格式不正确，仅支持字母、数字和连字符",
+                "unique": "该简写已存在"
+              }
+            }
+          }
+        },
+        "form": {
+          "title": {
+            "label": "文章标题",
+            "tooltip": "文章标题",
+            "placeholder": "请输入文章标题",
+            "rules": {
+              "required": "请输入文章标题"
+            }
+          },
+          "permalink": {
+            "label": "固定链接",
+            "tooltip": "固定链接地址，留空则自动使用当前时间戳。内容请使用小写英文和数字组合，使用“-”为连接符号，不可使用其它符号",
+            "placeholder": "请输入固定链接",
+            "rules": {
+              "required": "请输入固定链接",
+              "pattern": "格式不正确，仅支持小写字母、数字和连字符",
+              "unique": "该固定链接已存在"
+            }
+          },
+          "description": {
+            "label": "文章描述",
+            "tooltip": "文章摘要描述",
+            "placeholder": "请输入文章描述"
+          },
+          "content": {
+            "label": "内容",
+            "tooltip": "文章正文内容",
+            "placeholder": "请输入内容"
+          },
+          "category": {
+            "label": "分类",
+            "tooltip": "选择所属分类",
+            "placeholder": "请选择分类",
+            "rules": {
+              "required": "请选择分类"
+            }
+          }
+        }
+      },
       "banner": {
         "title": "横幅管理",
         "deleteTip": "确定删除横幅“{title}”吗？",
