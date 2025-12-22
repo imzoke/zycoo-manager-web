@@ -61,7 +61,7 @@
         "lastModified": "最后修改时间",
         "code": "代码"
       },
-      "total": "总数: {total}"
+      "total": "共 {total} 条"
     },
     "drawer": {
       "title": {
@@ -449,6 +449,45 @@
             "label": "内容",
             "tooltip": "详细内容",
             "placeholder": "请输入内容"
+          }
+        }
+      },
+      "page": {
+        "title": "页面管理",
+        "deleteTip": "确定删除页面 {title} 吗？",
+        "form": {
+          "title": {
+            "label": "标题",
+            "tooltip": "页面标题",
+            "placeholder": "请输入页面标题",
+            "rules": {
+              "required": "请输入页面标题"
+            }
+          },
+          "permalink": {
+            "label": "固定链接",
+            "tooltip": "页面的固定链接，例如 'about-us'",
+            "placeholder": "请输入固定链接",
+            "rules": {
+              "required": "请输入固定链接",
+              "format": "固定链接只能包含小写字母、数字和连字符",
+              "unique": "固定链接已存在"
+            }
+          },
+          "description": {
+            "label": "描述",
+            "tooltip": "页面描述 (SEO Meta Description)",
+            "placeholder": "请输入描述"
+          },
+          "content": {
+            "label": "内容",
+            "tooltip": "页面详细内容",
+            "placeholder": "请输入内容"
+          },
+          "schema_markup": {
+            "label": "Schema Markup",
+            "tooltip": "结构化数据 (JSON-LD)",
+            "placeholder": "请输入 Schema Markup"
           }
         }
       },
