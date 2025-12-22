@@ -170,7 +170,7 @@ import {
   DataTableColumn,
   FormRules,
   NTooltip,
-  NAvatar
+  NImage
 } from 'naive-ui';
 import { Plus, Edit, Trash } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
@@ -250,7 +250,7 @@ const columns = computed<DataTableColumn<BannerModel>[]>(() => [
         const src = row.src.startsWith('http')
           ? row.src
           : `https://www.zycoo.com/assets/${row.src}`;
-        return h(NAvatar, { src, size: 'small', objectFit: 'cover' });
+        return h(NImage, { src, width: '100%', objectFit: 'cover' });
       }
       return '-';
     }
