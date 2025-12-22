@@ -1,16 +1,17 @@
 <template>
   <n-layout has-sider style="height: 100vh">
     <n-layout-sider bordered>
-      <div class="app-layout">
-        <div class="app-sidebar">
-          <div class="app-brand"></div>
-          <n-menu
-            :options="menuOptions"
-            :default-expanded-keys="openKeys"
-            :value="getSelectedKeys"
-            @update:value="handleClickMenuItem"
-          ></n-menu>
-        </div>
+      <div class="app-brand"></div>
+      <n-scrollbar style="height: calc(100% - 57px)">
+        <n-menu
+          :options="menuOptions"
+          :default-expanded-keys="openKeys"
+          :value="getSelectedKeys"
+          @update:value="handleClickMenuItem"
+        ></n-menu>
+      </n-scrollbar>
+      <div class="footer">
+        <AppUser />
       </div>
     </n-layout-sider>
 
@@ -29,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import AppUser from '@/components/AppUser/index.vue';
 import { useI18n } from '@/hooks/web/useI18n';
 import { router } from '@/router';
 import { getMenus } from '@/router/menus';
@@ -128,9 +130,9 @@ onMounted(async () => {
 </script>
 
 <style lang="less" scoped>
-.app-layout {
-  .app-sidebar {
-    height: 100vh;
-  }
+.footer {
+  max-width: 100%;
+  padding: 10px;
+  border-top: 1px solid #f3f4f5;
 }
 </style>
