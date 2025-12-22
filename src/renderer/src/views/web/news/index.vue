@@ -202,6 +202,7 @@ import {
   updateNews,
   deleteNews,
   getNewsCategoryList,
+  checkNewsPermalink,
   NewsModel,
   NewsCategoryModel
 } from '@/api/news';
@@ -263,8 +264,24 @@ const rules: FormRules = {
   },
   permalink: {
     required: true,
-    message: t('views.web.news.form.permalink.rules.required'),
-    trigger: 'blur'
+    trigger: 'blur',
+    validator: async (_: any, value: string) => {
+      if (!value) {
+        return Promise.reject(Error(t('views.web.news.form.permalink.rules.required')));
+      }
+      if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value)) {
+        return Promise.reject(Error(t('views.web.news.form.permalink.rules.pattern')));
+      }
+      try {
+        const isUnique = await checkNewsPermalink({ permalink: value, id: formData.id });
+        if (!isUnique) {
+          return Promise.reject(Error(t('views.web.news.form.permalink.rules.unique')));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return Promise.resolve();
+    }
   },
   cover: {
     required: true,

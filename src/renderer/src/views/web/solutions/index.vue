@@ -227,6 +227,7 @@ import {
   createSolution,
   updateSolution,
   deleteSolution,
+  checkSolution,
   getCategoryList,
   SolutionModel,
   CategoryModel
@@ -296,8 +297,24 @@ const rules = {
   },
   permalink: {
     required: true,
-    message: t('views.web.solutions.form.permalink.rules.required'),
-    trigger: 'blur'
+    trigger: 'blur',
+    validator: async (_: any, value: string) => {
+      if (!value) {
+        return Promise.reject(Error(t('views.web.solutions.form.permalink.rules.required')));
+      }
+      if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(value)) {
+        return Promise.reject(Error(t('views.web.solutions.form.permalink.rules.pattern')));
+      }
+      try {
+        const isUnique = await checkSolution({ permalink: value, id: formData.id });
+        if (!isUnique) {
+          return Promise.reject(Error(t('views.web.solutions.form.permalink.rules.unique')));
+        }
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return Promise.resolve();
+    }
   },
   subheading: {
     required: true,
