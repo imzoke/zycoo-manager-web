@@ -43,6 +43,10 @@
       "totalFiles": "共 {n} 个文件",
       "readyToUpload": "准备上传 {n} 个",
 
+      "warning": "警告",
+      "closeTip": "当前有修改未保存，确定关闭吗？",
+      "confirm": "确定",
+
       "folder": "文件夹"
     },
     "table": {

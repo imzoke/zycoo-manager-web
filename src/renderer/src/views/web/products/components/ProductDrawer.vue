@@ -8,15 +8,13 @@
     :auto-focus="false"
     :close-on-esc="false"
     :trap-focus="false"
+    :on-update:show="handleCancel"
   >
     <n-drawer-content
       :native-scrollbar="false"
       closable
       :title="isEditing ? t('global.drawer.title.edit') : t('global.drawer.title.add')"
     >
-      <template #header>
-        {{ t(`global.drawer.title.${isEditing ? 'edit' : 'add'}`) }}
-      </template>
       <n-form
         ref="formRef"
         :model="formData"
@@ -111,7 +109,7 @@
 
       <template #footer>
         <n-flex justify="space-between" style="width: 100%">
-          <n-button @click="showDrawer = false">{{ t('global.txt.cancel') }}</n-button>
+          <n-button @click="handleCancel">{{ t('global.txt.cancel') }}</n-button>
           <n-button type="primary" :loading="submitting" @click="handleFormSubmit">
             {{ t('global.txt.submit') }}
           </n-button>
@@ -123,6 +121,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, PropType } from 'vue';
+import { cloneDeep, isEqual } from 'lodash-es';
 import {
   NDrawer,
   NDrawerContent,
@@ -134,6 +133,7 @@ import {
   NSelect,
   NFlex,
   useMessage,
+  useDialog,
   FormRules,
   SelectOption
 } from 'naive-ui';
@@ -144,6 +144,7 @@ import { createProduct, updateProduct, ProductModel, checkProduct } from '@/api/
 
 const { t } = useI18n();
 const message = useMessage();
+const dialog = useDialog();
 
 const props = defineProps({
   seriesOptions: {
@@ -167,6 +168,7 @@ const formData = reactive({
   parameter: '',
   index: 0
 });
+const originalFormData = ref(cloneDeep(formData));
 
 const rules: FormRules = {
   series_id: {
@@ -231,6 +233,7 @@ const open = (row?: ProductModel) => {
     formData.description = row.description;
     formData.parameter = row.parameter;
     formData.index = row.index;
+    originalFormData.value = cloneDeep(formData);
   } else {
     isEditing.value = false;
     formData.id = 0;
@@ -241,6 +244,23 @@ const open = (row?: ProductModel) => {
     formData.description = '';
     formData.parameter = '';
     formData.index = 0;
+    originalFormData.value = cloneDeep(formData);
+  }
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
   }
 };
 

@@ -42,15 +42,13 @@
       :auto-focus="false"
       :close-on-esc="false"
       :trap-focus="false"
+      :on-update:show="handleCancel"
     >
       <n-drawer-content
         :native-scrollbar="false"
         closable
         :title="isEditing ? t('global.drawer.title.edit') : t('global.drawer.title.add')"
       >
-        <template #header>
-          {{ t(`global.drawer.title.${isEditing ? 'edit' : 'add'}`) }}
-        </template>
         <n-form
           ref="formRef"
           :model="formData"
@@ -180,6 +178,7 @@ import UploadComponent from '@/components/Upload/index.vue';
 import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
 import { getBannerList, createBanner, updateBanner, deleteBanner, BannerModel } from '@/api/banner';
 import { formatToDateTime, dateUtil } from '@/utils/date';
+import { cloneDeep, isEqual } from 'lodash-es';
 
 const uploadPrefix = computed(() => {
   return `banner/${dateUtil().format('YYMMDD')}`;
@@ -216,6 +215,7 @@ const formData = reactive({
   index: 0,
   is_enabled: true
 });
+const originalFormData = ref(cloneDeep(formData));
 
 const rules: FormRules = {
   title: {
@@ -363,8 +363,10 @@ const handleAdd = () => {
   formData.link = '';
   formData.index = 0;
   formData.is_enabled = true;
+
+  originalFormData.value = cloneDeep(formData);
+
   showDrawer.value = true;
-  formData.src = '';
 };
 
 const handleEdit = (row: BannerModel) => {
@@ -378,7 +380,25 @@ const handleEdit = (row: BannerModel) => {
 
   formData.src = row.src.startsWith('http') ? row.src : `https://www.zycoo.com/assets/${row.src}`;
 
+  originalFormData.value = cloneDeep(formData);
+
   showDrawer.value = true;
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
+  }
 };
 
 const handleFormSubmit = () => {

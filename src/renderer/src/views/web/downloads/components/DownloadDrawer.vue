@@ -8,15 +8,13 @@
     :auto-focus="false"
     :close-on-esc="false"
     :trap-focus="false"
+    :on-update:show="handleCancel"
   >
     <n-drawer-content
       :native-scrollbar="false"
       closable
       :title="isEditing ? t('global.drawer.title.edit') : t('global.drawer.title.add')"
     >
-      <template #header>
-        {{ t(`global.drawer.title.${isEditing ? 'edit' : 'add'}`) }}
-      </template>
       <n-form
         ref="formRef"
         :model="formData"
@@ -234,7 +232,7 @@
 
       <template #footer>
         <n-flex justify="space-between" style="width: 100%">
-          <n-button @click="showDrawer = false">{{ t('global.txt.cancel') }}</n-button>
+          <n-button @click="handleCancel">{{ t('global.txt.cancel') }}</n-button>
           <n-button type="primary" :loading="submitting" @click="handleFormSubmit">
             {{ t('global.txt.submit') }}
           </n-button>
@@ -246,6 +244,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, PropType, computed } from 'vue';
+import { cloneDeep, isEqual } from 'lodash-es';
 import {
   NDrawer,
   NDrawerContent,
@@ -263,6 +262,7 @@ import {
   NRadioButton,
   NTransfer,
   useMessage,
+  useDialog,
   FormRules,
   SelectOption
 } from 'naive-ui';
@@ -281,6 +281,7 @@ import { debounce } from 'lodash-es';
 
 const { t } = useI18n();
 const message = useMessage();
+const dialog = useDialog();
 
 const props = defineProps({
   categoryOptions: {
@@ -321,6 +322,7 @@ const formData = reactive({
   sha1: '',
   filename: '' // New field
 });
+const originalFormData = ref(cloneDeep(formData));
 
 // Compute prefix based on category
 const currentCategoryShorthand = computed(() => {
@@ -417,6 +419,7 @@ const open = async (row?: DownloadModel) => {
       formData.filename = '';
     }
     uploadType.value = 'url';
+    originalFormData.value = cloneDeep(formData);
   } else {
     isEditing.value = false;
     formData.id = 0;
@@ -430,6 +433,23 @@ const open = async (row?: DownloadModel) => {
     formData.sha1 = '';
     formData.filename = '';
     uploadType.value = 'file';
+    originalFormData.value = cloneDeep(formData);
+  }
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
   }
 };
 

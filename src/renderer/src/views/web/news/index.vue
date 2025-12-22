@@ -62,15 +62,13 @@
       :auto-focus="false"
       :close-on-esc="false"
       :trap-focus="false"
+      :on-update:show="handleCancel"
     >
       <n-drawer-content
         :native-scrollbar="false"
         closable
         :title="isEditing ? t('global.drawer.title.edit') : t('global.drawer.title.add')"
       >
-        <template #header>
-          {{ t(`global.drawer.title.${isEditing ? 'edit' : 'add'}`) }}
-        </template>
         <n-form
           ref="formRef"
           :model="formData"
@@ -78,18 +76,6 @@
           require-mark-placement="right-hanging"
           style="max-width: 800px; margin: 0 auto"
         >
-          <n-form-item path="title">
-            <template #label>
-              <LabelWithTooltip
-                :label="t('views.web.news.form.title.label')"
-                :tooltip="t('views.web.news.form.title.tooltip')"
-              />
-            </template>
-            <n-input
-              v-model:value="formData.title"
-              :placeholder="t('views.web.news.form.title.placeholder')"
-            />
-          </n-form-item>
           <n-form-item path="category_id">
             <template #label>
               <LabelWithTooltip
@@ -102,6 +88,18 @@
               :options="categoryOptions"
               :placeholder="t('views.web.news.form.category.placeholder')"
               clearable
+            />
+          </n-form-item>
+          <n-form-item path="title">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.news.form.title.label')"
+                :tooltip="t('views.web.news.form.title.tooltip')"
+              />
+            </template>
+            <n-input
+              v-model:value="formData.title"
+              :placeholder="t('views.web.news.form.title.placeholder')"
             />
           </n-form-item>
           <n-form-item path="permalink">
@@ -155,7 +153,7 @@
 
         <template #footer>
           <n-flex justify="space-between" style="width: 100%">
-            <n-button @click="showDrawer = false">{{ t('global.txt.cancel') }}</n-button>
+            <n-button @click="handleCancel">{{ t('global.txt.cancel') }}</n-button>
             <n-button type="primary" :loading="submitting" @click="handleFormSubmit">
               {{ t('global.txt.submit') }}
             </n-button>
@@ -211,6 +209,7 @@ import { formatToDateTime, dateUtil } from '@/utils/date';
 const uploadPrefix = computed(() => {
   return `news/${dateUtil().format('YYMMDD')}`;
 });
+import { cloneDeep, isEqual } from 'lodash-es';
 
 const { t } = useI18n();
 const message = useMessage();
@@ -226,6 +225,15 @@ const formRef = ref<any>(null);
 const categoryDrawerRef = ref<any>(null);
 const categoryOptions = ref<SelectOption[]>([]);
 const selectedCategoryId = ref<number | null>(null);
+const originalFormData = ref<FormData>({
+  id: 0,
+  title: '',
+  description: '',
+  permalink: '',
+  cover: '',
+  content: '',
+  category_id: undefined
+});
 
 const pagination = reactive({
   page: 1,
@@ -431,6 +439,7 @@ const handleAdd = () => {
   formData.cover = '';
   formData.content = '';
   formData.category_id = undefined;
+  originalFormData.value = cloneDeep(formData);
   showDrawer.value = true;
 };
 
@@ -447,7 +456,24 @@ const handleEdit = (row: NewsModel) => {
     : `https://www.zycoo.com/assets/${row.cover}`;
   formData.content = row.content.replaceAll('src="/assets/', 'src="https://www.zycoo.com/assets/');
   formData.category_id = row.category_id || undefined;
+  originalFormData.value = cloneDeep(formData);
   showDrawer.value = true;
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
+  }
 };
 
 const handleFormSubmit = () => {

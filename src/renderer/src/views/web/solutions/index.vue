@@ -54,7 +54,7 @@
     />
 
     <n-drawer
-      v-model:show="drawerActive"
+      v-model:show="showDrawer"
       default-width="70%"
       :min-width="500"
       :mask-closable="false"
@@ -62,126 +62,126 @@
       :auto-focus="false"
       :close-on-esc="false"
       :trap-focus="false"
+      :on-update:show="handleCancel"
     >
-      <n-drawer-content :native-scrollbar="false" closable>
-        <template #header>
-          {{ t(`global.drawer.title.${editFlag ? 'edit' : 'add'}`) }}
-        </template>
-        <template #default>
-          <n-form ref="formRef" :model="formData" :rules="rules">
-            <n-form-item path="category_id">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.category.label')"
-                  :tooltip="t('views.web.solutions.form.category.tooltip')"
-                />
-              </template>
-              <n-select
-                v-model:value="formData.category_id"
-                :options="categoryOptions"
-                :placeholder="t('views.web.solutions.form.category.placeholder')"
-                clearable
+      <n-drawer-content
+        :native-scrollbar="false"
+        closable
+        :title="isEditing ? t('global.drawer.title.edit') : t('global.drawer.title.add')"
+      >
+        <n-form ref="formRef" :model="formData" :rules="rules">
+          <n-form-item path="category_id">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.category.label')"
+                :tooltip="t('views.web.solutions.form.category.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="title">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.title.label')"
-                  :tooltip="t('views.web.solutions.form.title.tooltip')"
-                />
-              </template>
-              <n-input
-                v-model:value="formData.title"
-                :placeholder="t('views.web.solutions.form.title.placeholder')"
+            </template>
+            <n-select
+              v-model:value="formData.category_id"
+              :options="categoryOptions"
+              :placeholder="t('views.web.solutions.form.category.placeholder')"
+              clearable
+            />
+          </n-form-item>
+          <n-form-item path="title">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.title.label')"
+                :tooltip="t('views.web.solutions.form.title.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="description">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.description.label')"
-                  :tooltip="t('views.web.solutions.form.description.tooltip')"
-                />
-              </template>
-              <n-input
-                v-model:value="formData.description"
-                type="textarea"
-                :placeholder="t('views.web.solutions.form.description.placeholder')"
+            </template>
+            <n-input
+              v-model:value="formData.title"
+              :placeholder="t('views.web.solutions.form.title.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="description">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.description.label')"
+                :tooltip="t('views.web.solutions.form.description.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="permalink">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.permalink.label')"
-                  :tooltip="t('views.web.solutions.form.permalink.tooltip')"
-                />
-              </template>
-              <n-input
-                v-model:value="formData.permalink"
-                :placeholder="t('views.web.solutions.form.permalink.placeholder')"
+            </template>
+            <n-input
+              v-model:value="formData.description"
+              type="textarea"
+              :placeholder="t('views.web.solutions.form.description.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="permalink">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.permalink.label')"
+                :tooltip="t('views.web.solutions.form.permalink.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="subheading">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.subheading.label')"
-                  :tooltip="t('views.web.solutions.form.subheading.tooltip')"
-                />
-              </template>
-              <n-input
-                v-model:value="formData.subheading"
-                :placeholder="t('views.web.solutions.form.subheading.placeholder')"
+            </template>
+            <n-input
+              v-model:value="formData.permalink"
+              :placeholder="t('views.web.solutions.form.permalink.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="subheading">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.subheading.label')"
+                :tooltip="t('views.web.solutions.form.subheading.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="subtitle">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.subtitle.label')"
-                  :tooltip="t('views.web.solutions.form.subtitle.tooltip')"
-                />
-              </template>
-              <n-input
-                v-model:value="formData.subtitle"
-                :placeholder="t('views.web.solutions.form.subtitle.placeholder')"
+            </template>
+            <n-input
+              v-model:value="formData.subheading"
+              :placeholder="t('views.web.solutions.form.subheading.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="subtitle">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.subtitle.label')"
+                :tooltip="t('views.web.solutions.form.subtitle.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="cover">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.cover.label')"
-                  :tooltip="t('views.web.solutions.form.cover.tooltip')"
-                />
-              </template>
-              <UploadComponent
-                v-model:value="formData.cover"
-                :prefix="uploadPrefix"
-                @success="handleUploadSuccess"
+            </template>
+            <n-input
+              v-model:value="formData.subtitle"
+              :placeholder="t('views.web.solutions.form.subtitle.placeholder')"
+            />
+          </n-form-item>
+          <n-form-item path="cover">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.cover.label')"
+                :tooltip="t('views.web.solutions.form.cover.tooltip')"
               />
-            </n-form-item>
-            <n-form-item path="content">
-              <template #label>
-                <LabelWithTooltip
-                  :label="t('views.web.solutions.form.content.label')"
-                  :tooltip="t('views.web.solutions.form.content.tooltip')"
-                />
-              </template>
-              <EditorComponent v-model="formData.content" page-type="solution"></EditorComponent>
-            </n-form-item>
-          </n-form>
-        </template>
+            </template>
+            <UploadComponent
+              v-model:value="formData.cover"
+              :prefix="uploadPrefix"
+              @success="handleUploadSuccess"
+            />
+          </n-form-item>
+          <n-form-item path="content">
+            <template #label>
+              <LabelWithTooltip
+                :label="t('views.web.solutions.form.content.label')"
+                :tooltip="t('views.web.solutions.form.content.tooltip')"
+              />
+            </template>
+            <EditorComponent v-model="formData.content" page-type="solution"></EditorComponent>
+          </n-form-item>
+        </n-form>
 
         <template #footer>
           <n-flex justify="space-between" style="width: 100%">
-            <n-button @click="handlePreview">
-              {{ t('global.txt.preview') }}
+            <n-button @click="handleCancel">
+              {{ t('global.txt.cancel') }}
             </n-button>
-            <!-- <n-flex>
-              <n-button @click="drawerActive = false">
-                {{ t('global.txt.cancel') }}
-              </n-button> -->
-            <n-button type="primary" :loading="submitting" @click="handleSubmit">
-              {{ t('global.txt.submit') }}
-            </n-button>
-            <!-- </n-flex> -->
+            <n-flex>
+              <n-button @click="handlePreview">
+                {{ t('global.txt.preview') }}
+              </n-button>
+              <n-button type="primary" :loading="submitting" @click="handleSubmit">
+                {{ t('global.txt.submit') }}
+              </n-button>
+            </n-flex>
           </n-flex>
         </template>
       </n-drawer-content>
@@ -198,6 +198,7 @@ import { dateUtil } from '@/utils/date';
 const uploadPrefix = computed(() => {
   return `solution/${dateUtil().format('YYMMDD')}`;
 });
+import { cloneDeep, isEqual } from 'lodash-es';
 import {
   NButton,
   NDataTable,
@@ -243,11 +244,11 @@ const tableRef = ref<any>(null);
 
 const loading = ref(false);
 const dataList = ref<SolutionModel[]>([]);
+const showDrawer = ref(false);
 const searchText = ref('');
 const selectedCategoryId = ref<number | null>(null);
 
-const drawerActive = ref(false);
-const editFlag = ref(false);
+const isEditing = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
 
@@ -275,6 +276,8 @@ const defaultFormData = {
   content: '',
   category_id: undefined
 };
+
+const originalFormData = ref<FormData>({ ...defaultFormData });
 
 const formData = reactive<FormData>({ ...defaultFormData });
 
@@ -452,14 +455,15 @@ const handleFiltersChange = (filters: any) => {
 };
 
 const handleAdd = () => {
-  editFlag.value = false;
+  isEditing.value = false;
   Object.assign(formData, defaultFormData);
   delete formData.id;
-  drawerActive.value = true;
+  originalFormData.value = cloneDeep(formData);
+  showDrawer.value = true;
 };
 
 const handleEdit = (row: SolutionModel) => {
-  editFlag.value = true;
+  isEditing.value = true;
   formData.id = row.id;
   formData.title = row.title;
   formData.description = row.description;
@@ -471,7 +475,24 @@ const handleEdit = (row: SolutionModel) => {
     : `https://www.zycoo.com/assets/${row.cover}`;
   formData.content = row.content.replaceAll('src="/assets/', 'src="https://www.zycoo.com/assets/');
   formData.category_id = row.category_id;
-  drawerActive.value = true;
+  originalFormData.value = cloneDeep(formData);
+  showDrawer.value = true;
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
+  }
 };
 
 const handleSubmit = () => {
@@ -495,7 +516,7 @@ const handleSubmit = () => {
           await createSolution(formData);
           message.success(t('global.txt.createSuccess'));
         }
-        drawerActive.value = false;
+        showDrawer.value = false;
         fetchData();
       } catch (error) {
         console.error(error);
