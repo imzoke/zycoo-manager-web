@@ -62,10 +62,10 @@ export const useUserStore = defineStore('app-user', {
     },
 
     resetState() {
-      this.token = undefined;
-      this.userInfo = null;
-      this.roles = [];
-      this.sessionTimeout = false;
+      this.setToken(undefined);
+      this.setUserInfo(null);
+      this.setRoleList([]);
+      this.setSessionTimeout(false);
     },
 
     async login(form: LoginParams & { mode?: ErrorMessageMode }): Promise<UserInfo | null> {
