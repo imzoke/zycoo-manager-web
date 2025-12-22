@@ -16,6 +16,22 @@
             </template>
             <span>{{ t('global.txt.add') }}</span>
           </n-tooltip>
+          <n-input-group>
+            <n-input
+              v-model:value="searchText"
+              :placeholder="t('global.txt.search')"
+              clearable
+              @keydown.enter="fetchData"
+              @clear="handleClear"
+            />
+            <n-button @click="fetchData">
+              <template #icon>
+                <n-icon>
+                  <Search />
+                </n-icon>
+              </template>
+            </n-button>
+          </n-input-group>
         </n-space>
       </div>
     </header>
@@ -154,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, h, onMounted, computed } from 'vue';
+import { ref, reactive, h, onMounted, computed, nextTick } from 'vue';
 import { cloneDeep, isEqual } from 'lodash-es';
 import {
   NDataTable,
@@ -172,9 +188,10 @@ import {
   DataTableColumn,
   FormRules,
   NTooltip,
-  NImage
+  NImage,
+  NInputGroup
 } from 'naive-ui';
-import { Plus, Edit, Trash } from '@vicons/tabler';
+import { Plus, Edit, Trash, Search } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
 import UploadComponent from '@/components/Upload/index.vue';
 import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
@@ -195,6 +212,7 @@ const { t } = useI18n();
 const message = useMessage();
 const dialog = useDialog();
 
+const searchText = ref('');
 const tableRef = ref<any>(null);
 
 const loading = ref(false);
@@ -325,7 +343,8 @@ const fetchData = async () => {
   try {
     const res: any = await getWebinarList({
       page: pagination.page,
-      per_page: pagination.pageSize
+      per_page: pagination.pageSize,
+      title: searchText.value
     });
     if (res && res.items) {
       dataList.value = res.items;
@@ -440,6 +459,12 @@ const handleDelete = (row: WebinarModel) => {
 
 const handleUploadSuccess = (url: string) => {
   formData.cover = `${url}`;
+};
+
+const handleClear = () => {
+  nextTick(() => {
+    fetchData();
+  });
 };
 
 const handlePageChange = (page: number) => {
