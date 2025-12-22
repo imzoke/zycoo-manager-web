@@ -1,7 +1,7 @@
 import { LAYOUT } from '@/router/constant';
 import { AppRouteModule } from '@/router/types';
 import { renderIcon } from '@/utils';
-import { Ad, Bulb, News, BrandProducthunt, Download, Book } from '@vicons/tabler';
+import { Ad, Bulb, News, BrandProducthunt, Download, Book, Video } from '@vicons/tabler';
 
 const system: AppRouteModule = {
   path: '/web',
@@ -38,6 +38,15 @@ const system: AppRouteModule = {
       meta: {
         title: 'views.web.article.title',
         icon: renderIcon(Book)
+      }
+    },
+    {
+      path: 'webinar',
+      name: 'Webinar',
+      component: () => import('@/views/web/webinar/index.vue'),
+      meta: {
+        title: 'views.web.webinar.title',
+        icon: renderIcon(Video)
       }
     },
     {

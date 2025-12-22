@@ -405,6 +405,53 @@
           }
         }
       },
+      "webinar": {
+        "title": "Webinar管理",
+        "deleteTip": "确定删除Webinar {title} 吗？",
+        "form": {
+          "title": {
+            "label": "标题",
+            "tooltip": "Webinar标题",
+            "placeholder": "请输入Webinar标题",
+            "rules": {
+              "required": "请输入Webinar标题"
+            }
+          },
+          "link": {
+            "label": "链接",
+            "tooltip": "Webinar链接",
+            "placeholder": "请输入链接",
+            "rules": {
+              "required": "请输入链接"
+            }
+          },
+          "time": {
+            "label": "时间",
+            "tooltip": "Webinar时间",
+            "placeholder": "请输入时间",
+            "rules": {
+              "required": "请输入时间"
+            }
+          },
+          "cover": {
+            "label": "封面",
+            "tooltip": "Webinar封面图片",
+            "rules": {
+              "required": "请上传封面"
+            }
+          },
+          "description": {
+            "label": "描述",
+            "tooltip": "简短描述",
+            "placeholder": "请输入描述"
+          },
+          "content": {
+            "label": "内容",
+            "tooltip": "详细内容",
+            "placeholder": "请输入内容"
+          }
+        }
+      },
       "products": {
         "title": "产品管理",
         "deleteTip": "确定删除产品“{title}”吗？",
