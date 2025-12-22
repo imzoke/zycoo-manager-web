@@ -258,7 +258,7 @@ const pagination = reactive({
   itemCount: 0,
   showSizePicker: true,
   pageSizes: [10, 20, 50, 100],
-  prefix: ({ itemCount }) => `Total ${itemCount} items`
+  prefix: ({ itemCount }) => t('global.table.total', { total: itemCount })
 });
 
 interface FormData extends Omit<SolutionModel, 'id' | 'created_at' | 'updated_at' | 'category_id'> {
