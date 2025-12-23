@@ -1,7 +1,7 @@
 import { LAYOUT } from '@/router/constant';
 import { AppRouteModule } from '@/router/types';
 import { renderIcon } from '@/utils';
-import { User, PlayCard } from '@vicons/tabler';
+import { Api, User, PlayCard } from '@vicons/tabler';
 
 const system: AppRouteModule = {
   path: '/system',
@@ -29,6 +29,15 @@ const system: AppRouteModule = {
       meta: {
         title: 'views.system.roles.title',
         icon: renderIcon(PlayCard)
+      }
+    },
+    {
+      path: 'logs',
+      name: 'system-logs',
+      component: () => import('@/views/system/log/index.vue'),
+      meta: {
+        title: 'views.system.log.title',
+        icon: renderIcon(Api)
       }
     }
   ]

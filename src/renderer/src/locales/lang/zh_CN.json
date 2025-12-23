@@ -755,6 +755,16 @@
             }
           }
         }
+      },
+      "log": {
+        "title": "操作日志",
+        "columns": {
+          "username": "用户",
+          "method": "方法",
+          "path": "路径",
+          "status": "状态",
+          "latency": "耗时"
+        }
       }
     }
   }
