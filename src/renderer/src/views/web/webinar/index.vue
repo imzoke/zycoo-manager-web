@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['web:webinar:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -202,6 +202,7 @@ import {
   deleteWebinar,
   WebinarModel
 } from '@/api/webinar';
+import { useUserStore } from '@/store/modules/user';
 import { formatToDateTime, dateUtil } from '@/utils/date';
 
 const uploadPrefix = computed(() => {
@@ -294,8 +295,14 @@ const columns = computed<DataTableColumn<WebinarModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:webinar:edit') || permissions.includes('*:*:*');
+      const hasDelete = permissions.includes('web:webinar:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -313,7 +320,11 @@ const columns = computed<DataTableColumn<WebinarModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -332,7 +343,11 @@ const columns = computed<DataTableColumn<WebinarModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

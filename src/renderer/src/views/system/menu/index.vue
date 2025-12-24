@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd(0)">
+              <n-button v-permission="['system:menus:add']" type="primary" @click="handleAdd(0)">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -186,6 +186,7 @@ import {
 import { Plus, Edit, Trash } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
 import { getMenuList, createMenu, updateMenu, deleteMenu, MenuModel, MenuType } from '@/api/menu';
+import { useUserStore } from '@/store/modules/user';
 import { cloneDeep, isEqual } from 'lodash-es';
 
 const { t } = useI18n();
@@ -290,8 +291,16 @@ const columns = computed<DataTableColumn<MenuModel>[]>(() => [
     width: 120,
     fixed: 'right',
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasAdd = permissions.includes('system:menus:add') || permissions.includes('*:*:*');
+      const hasEdit = permissions.includes('system:menus:edit') || permissions.includes('*:*:*');
+      const hasDelete =
+        permissions.includes('system:menus:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasAdd) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -309,7 +318,11 @@ const columns = computed<DataTableColumn<MenuModel>[]>(() => [
                 ),
               default: () => t('global.txt.add', 'Add')
             }
-          ),
+          )
+        );
+      }
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -327,7 +340,11 @@ const columns = computed<DataTableColumn<MenuModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit', 'Edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -346,7 +363,11 @@ const columns = computed<DataTableColumn<MenuModel>[]>(() => [
               default: () => t('global.txt.delete', 'Delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

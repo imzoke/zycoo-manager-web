@@ -16,7 +16,7 @@
             </template>
             <span>{{ t('global.txt.reload') }}</span>
           </n-tooltip>
-          <n-button type="primary" @click="handleUpload">
+          <n-button v-permission="['storage:qiniu:add']" type="primary" @click="handleUpload">
             <template #icon>
               <n-icon>
                 <Upload />
@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h, onMounted, nextTick } from 'vue';
+import { ref, h, onMounted, nextTick, computed } from 'vue';
 import {
   NButton,
   useMessage,
@@ -90,6 +90,7 @@ const handlePageScroll = () => {
   tableRef.value?.scrollTo({ top: 0 });
 };
 
+import { useUserStore } from '@/store/modules/user';
 const { t } = useI18n();
 
 const pagination = {
@@ -113,7 +114,7 @@ const renderIcon = (icon: any) => {
   return () => h(NIcon, null, { default: () => h(icon) });
 };
 
-const columns: DataTableColumn[] = [
+const columns = computed<DataTableColumn[]>(() => [
   {
     title: t('global.table.columns.name'),
     key: 'key',
@@ -170,19 +171,28 @@ const columns: DataTableColumn[] = [
     width: 100,
     render(row: any) {
       if (row.is_back) return null;
-      const options = [
+
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasDelete =
+        permissions.includes('storage:qiniu:delete') || permissions.includes('*:*:*');
+
+      const options: any[] = [
         {
           label: t('global.txt.copy'),
           key: 'copy',
           icon: renderIcon(Copy),
           disabled: row.is_dir
-        },
-        {
+        }
+      ];
+
+      if (hasDelete) {
+        options.push({
           label: t('global.txt.delete'),
           key: 'delete',
           icon: renderIcon(Trash)
-        }
-      ];
+        });
+      }
 
       return h(
         NDropdown,
@@ -207,7 +217,7 @@ const columns: DataTableColumn[] = [
       );
     }
   }
-];
+]);
 
 const rowProps = (row: any) => {
   return {

@@ -39,9 +39,22 @@ export const useUserStore = defineStore('app-user', {
       return this.roles.length > 0 ? this.roles : getAuthCache<any[]>(ROLES_KEY);
     },
     getPermissions(): string[] {
-      return this.permissions.length > 0
-        ? this.permissions
-        : getAuthCache<string[]>(PERMISSIONS_KEY);
+      const perms =
+        this.permissions.length > 0
+          ? this.permissions
+          : getAuthCache<string[]>(PERMISSIONS_KEY) || [];
+
+      // Check if user is super_admin
+      const roles = this.getRoles;
+      const isSuperAdmin = roles.some((role: any) => {
+        const roleCode = typeof role === 'string' ? role : role?.code;
+        return roleCode === 'role_super_admin';
+      });
+
+      if (isSuperAdmin && !perms.includes('*:*:*')) {
+        return ['*:*:*', ...perms];
+      }
+      return perms;
     },
     getSessionTimeout(): boolean {
       return !!this.sessionTimeout;

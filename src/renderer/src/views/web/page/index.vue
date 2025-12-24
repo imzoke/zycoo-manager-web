@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['web:page:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -169,6 +169,7 @@ import {
   checkPage,
   PageModel
 } from '@/api/page';
+import { useUserStore } from '@/store/modules/user';
 import { formatToDateTime } from '@/utils/date';
 
 const { t } = useI18n();
@@ -250,8 +251,14 @@ const columns = computed<DataTableColumn<PageModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:page:edit') || permissions.includes('*:*:*');
+      const hasDelete = permissions.includes('web:page:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -269,7 +276,11 @@ const columns = computed<DataTableColumn<PageModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -288,7 +299,11 @@ const columns = computed<DataTableColumn<PageModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

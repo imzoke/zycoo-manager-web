@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['web:banner:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -177,6 +177,7 @@ import { useI18n } from '@/hooks/web/useI18n';
 import UploadComponent from '@/components/Upload/index.vue';
 import LabelWithTooltip from '@/components/LabelWithTooltip/index.vue';
 import { getBannerList, createBanner, updateBanner, deleteBanner, BannerModel } from '@/api/banner';
+import { useUserStore } from '@/store/modules/user';
 import { formatToDateTime, dateUtil } from '@/utils/date';
 import { cloneDeep, isEqual } from 'lodash-es';
 
@@ -286,8 +287,14 @@ const columns = computed<DataTableColumn<BannerModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:banner:edit') || permissions.includes('*:*:*');
+      const hasDelete = permissions.includes('web:banner:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -305,7 +312,11 @@ const columns = computed<DataTableColumn<BannerModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -324,7 +335,11 @@ const columns = computed<DataTableColumn<BannerModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['web:news:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -205,10 +205,7 @@ import {
   NewsCategoryModel
 } from '@/api/news';
 import { formatToDateTime, dateUtil } from '@/utils/date';
-
-const uploadPrefix = computed(() => {
-  return `news/${dateUtil().format('YYMMDD')}`;
-});
+import { useUserStore } from '@/store/modules/user';
 import { cloneDeep, isEqual } from 'lodash-es';
 
 const { t } = useI18n();
@@ -330,8 +327,14 @@ const columns = computed<DataTableColumn<NewsModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:news:edit') || permissions.includes('*:*:*');
+      const hasDelete = permissions.includes('web:news:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -349,7 +352,11 @@ const columns = computed<DataTableColumn<NewsModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -368,7 +375,11 @@ const columns = computed<DataTableColumn<NewsModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

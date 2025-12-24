@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleCreate">
+              <n-button v-permission="['web:downloads:add']" type="primary" @click="handleCreate">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -101,6 +101,7 @@ import {
   DownloadModel,
   DownloadCategoryModel
 } from '@/api/download';
+import { useUserStore } from '@/store/modules/user';
 import CategoryDrawer from './components/CategoryDrawer.vue';
 import DownloadDrawer from './components/DownloadDrawer.vue';
 import RecycleBinDrawer from './components/RecycleBinDrawer.vue';
@@ -193,8 +194,15 @@ const columns = computed<DataTableColumn<DownloadModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:downloads:edit') || permissions.includes('*:*:*');
+      const hasDelete =
+        permissions.includes('web:downloads:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -212,7 +220,11 @@ const columns = computed<DataTableColumn<DownloadModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -231,7 +243,11 @@ const columns = computed<DataTableColumn<DownloadModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

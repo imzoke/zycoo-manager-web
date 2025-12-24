@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['web:solutions:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -233,6 +233,7 @@ import {
   SolutionModel,
   CategoryModel
 } from '@/api/solution';
+import { useUserStore } from '@/store/modules/user';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -355,8 +356,15 @@ const columns = computed<DataTableColumn<SolutionModel>[]>(() => [
     key: 'actions',
     width: 120,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('web:solutions:edit') || permissions.includes('*:*:*');
+      const hasDelete =
+        permissions.includes('web:solutions:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -374,7 +382,11 @@ const columns = computed<DataTableColumn<SolutionModel>[]>(() => [
                 ),
               default: () => t('global.txt.edit')
             }
-          ),
+          )
+        );
+      }
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -393,7 +405,11 @@ const columns = computed<DataTableColumn<SolutionModel>[]>(() => [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

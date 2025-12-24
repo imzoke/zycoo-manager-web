@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button v-permission="['system:role:add']" type="primary" @click="handleAdd">
+              <n-button v-permission="['system:roles:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -148,6 +148,7 @@ import {
 } from '@/api/role';
 import { getMenuList, MenuModel } from '@/api/menu';
 import { useI18n } from '@/hooks/web/useI18n';
+import { useUserStore } from '@/store/modules/user';
 import { cloneDeep, isEqual } from 'lodash-es';
 
 const { t } = useI18n();
@@ -212,8 +213,17 @@ const columns: DataTableColumn<RoleModel>[] = [
     key: 'actions',
     width: 200,
     render(row) {
-      return h(NSpace, null, {
-        default: () => [
+      if (row.code === 'super_admin') return null;
+      const userStore = useUserStore();
+      const permissions = userStore.getPermissions;
+      const hasEdit = permissions.includes('system:roles:edit') || permissions.includes('*:*:*');
+      const hasDelete =
+        permissions.includes('system:roles:delete') || permissions.includes('*:*:*');
+
+      const buttons: any[] = [];
+
+      if (hasEdit) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -249,7 +259,12 @@ const columns: DataTableColumn<RoleModel>[] = [
                 ),
               default: () => t('views.system.roles.permission.tooltip')
             }
-          ),
+          )
+        );
+      }
+
+      if (hasDelete) {
+        buttons.push(
           h(
             NTooltip,
             { trigger: 'hover' },
@@ -268,7 +283,11 @@ const columns: DataTableColumn<RoleModel>[] = [
               default: () => t('global.txt.delete')
             }
           )
-        ]
+        );
+      }
+
+      return h(NSpace, null, {
+        default: () => buttons
       });
     }
   }

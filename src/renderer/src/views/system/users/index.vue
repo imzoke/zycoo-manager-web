@@ -4,7 +4,7 @@
       <h1>{{ t('views.system.users.title') }}</h1>
       <div class="controls">
         <n-flex>
-          <div v-permission="['system:user:add']">
+          <div v-permission="['system:users:add']">
             <n-tooltip>
               <template #trigger>
                 <n-button type="primary" @click="handleClickAdd">
@@ -242,9 +242,9 @@ const columns = computed<DataTableColumn<UserModel>[]>(() =>
         const userStore = useUserStore();
         const permissions = userStore.getPermissions;
 
-        const hasEdit = permissions.includes('system:user:edit') || permissions.includes('*:*:*');
+        const hasEdit = permissions.includes('system:users:edit') || permissions.includes('*:*:*');
         const hasDelete =
-          permissions.includes('system:user:delete') || permissions.includes('*:*:*');
+          permissions.includes('system:users:delete') || permissions.includes('*:*:*');
 
         const buttons: any[] = [];
         if (hasEdit) {
