@@ -85,3 +85,25 @@ export const getCategory = (id: number) => {
 export const checkCategory = (params: { shorthand: string; id?: number }) => {
   return defHttp.post<boolean>({ url: `${Api.Categories}/check`, params });
 };
+// ----------------------------------------
+// Recycle Bin
+// ----------------------------------------
+
+export function getDeletedDownloadList(params?: any) {
+  return defHttp.get<BasicFetchResult<DownloadModel>>({
+    url: `${Api.Base}/trashed`,
+    params
+  });
+}
+
+export function restoreDownload(id: number) {
+  return defHttp.put<void>({
+    url: `${Api.Base}/${id}/restore`
+  });
+}
+
+export function forceDeleteDownload(id: number) {
+  return defHttp.delete<void>({
+    url: `${Api.Base}/${id}/force`
+  });
+}

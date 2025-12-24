@@ -70,7 +70,15 @@
       "sent": "发送",
       "recv": "接收",
 
-      "folder": "文件夹"
+      "folder": "文件夹",
+      "recycleBin": "回收站",
+      "restore": "恢复",
+      "forceDelete": "彻底删除",
+      "confirmForceDelete": "确认彻底删除该项目吗？此操作不可逆，云端/本地文件也将被删除。",
+      "forceDeleteSuccess": "彻底删除成功",
+      "forceDeleteFailed": "彻底删除失败",
+      "restoreSuccess": "恢复成功",
+      "restoreFailed": "恢复失败"
     },
     "table": {
       "columns": {

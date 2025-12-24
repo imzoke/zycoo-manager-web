@@ -16,7 +16,20 @@
             </template>
             <span>{{ t('global.txt.add') }}</span>
           </n-tooltip>
-          <n-button @click="handleManageCategory">
+          <n-button type="warning" @click="handleRecycleBin">
+            <template #icon>
+              <n-icon>
+                <Trash />
+              </n-icon>
+            </template>
+            {{ t('global.txt.recycleBin') }}
+          </n-button>
+          <n-button type="primary" @click="handleManageCategory">
+            <template #icon>
+              <n-icon>
+                <Folder />
+              </n-icon>
+            </template>
             {{ t('views.web.downloads.category.title') }}
           </n-button>
           <n-input-group>
@@ -54,13 +67,14 @@
     />
 
     <!-- Drawers -->
-    <CategoryDrawer ref="categoryDrawerRef" @close="fetchCategories" />
+    <CategoryDrawer ref="categoryDrawerRef" @close="fetchCategories" @success="handleRefresh" />
     <DownloadDrawer
       ref="downloadDrawerRef"
       :category-options="categorySelectOptions"
       :categories="categories"
-      @success="handleSuccess"
+      @success="handleRefresh"
     />
+    <RecycleBinDrawer ref="recycleBinDrawerRef" @refresh="handleRefresh" />
   </div>
 </template>
 
@@ -78,7 +92,7 @@ import {
   useDialog,
   DataTableColumn
 } from 'naive-ui';
-import { Search, Plus, Edit, Trash } from '@vicons/tabler';
+import { Search, Plus, Edit, Trash, Folder } from '@vicons/tabler';
 import { useI18n } from '@/hooks/web/useI18n';
 import {
   getDownloadList,
@@ -89,6 +103,7 @@ import {
 } from '@/api/download';
 import CategoryDrawer from './components/CategoryDrawer.vue';
 import DownloadDrawer from './components/DownloadDrawer.vue';
+import RecycleBinDrawer from './components/RecycleBinDrawer.vue';
 import { formatToDateTime } from '@/utils/date';
 
 const { t } = useI18n();
@@ -97,6 +112,7 @@ const dialog = useDialog();
 
 const categoryDrawerRef = ref();
 const downloadDrawerRef = ref();
+const recycleBinDrawerRef = ref();
 
 const tableRef = ref<any>(null);
 
@@ -324,12 +340,17 @@ const handleDelete = (record: DownloadModel) => {
   });
 };
 
-const handleSuccess = () => {
-  handleSearch();
+const handleManageCategory = () => {
+  categoryDrawerRef.value?.open();
 };
 
-const handleManageCategory = () => {
-  categoryDrawerRef.value.open();
+const handleRecycleBin = () => {
+  recycleBinDrawerRef.value?.open();
+};
+
+const handleRefresh = () => {
+  fetchData();
+  fetchCategories(); // Also refresh categories in case they were managed
 };
 
 onMounted(() => {
