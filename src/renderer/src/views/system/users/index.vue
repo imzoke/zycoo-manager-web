@@ -4,9 +4,20 @@
       <h1>{{ t('views.system.users.title') }}</h1>
       <div class="controls">
         <n-flex>
-          <n-button type="primary" @click="handleClickAdd">
-            {{ t('global.txt.add') }}
-          </n-button>
+          <div v-permission="['system:user:add']">
+            <n-tooltip>
+              <template #trigger>
+                <n-button type="primary" @click="handleClickAdd">
+                  <template #icon>
+                    <n-icon>
+                      <Plus />
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              <span>{{ t('global.txt.add', 'Add') }}</span>
+            </n-tooltip>
+          </div>
 
           <n-tooltip>
             <template #trigger>
@@ -24,9 +35,26 @@
       </div>
     </header>
 
-    <BasicTable @register="registerTable"> </BasicTable>
+    <n-data-table
+      remote
+      :columns="columns"
+      :data="dataList"
+      :loading="loading"
+      :pagination="pagination"
+      :max-height="`calc(100vh - 190px)`"
+      :row-key="(row) => row.id"
+      @update:page="handlePageChange"
+      @update:page-size="handlePageSizeChange"
+    />
 
-    <n-drawer v-model:show="drawerActive" width="500px">
+    <n-drawer
+      v-model:show="showDrawer"
+      width="500px"
+      :auto-focus="false"
+      :close-on-esc="false"
+      :trap-focus="false"
+      :on-update:show="handleCancel"
+    >
       <n-drawer-content :native-scrollbar="false" closable>
         <template #header>
           {{ t(`global.drawer.title.${editFlag ? 'edit' : 'add'}`) }}
@@ -47,10 +75,15 @@
             </n-form-item>
           </n-form>
         </template>
+
         <template #footer>
-          <n-flex>
-            <n-button @click="drawerActive = false">{{ t('global.txt.cancel') }}</n-button>
-            <n-button type="primary">{{ t('global.txt.submit') }}</n-button>
+          <n-flex justify="space-between" style="width: 100%">
+            <n-button @click="handleCancel">
+              {{ t('global.txt.cancel') }}
+            </n-button>
+            <n-button type="primary" :loading="submitting" @click="handleSubmit">
+              {{ t('global.txt.submit') }}
+            </n-button>
           </n-flex>
         </template>
       </n-drawer-content>
@@ -60,61 +93,221 @@
 
 <script setup lang="ts">
 import { getRoleOptions } from '@/api/role';
-import { getUserListApi } from '@/api/user';
-import { BasicTable, useTable } from '@/components/Table';
+import { createUser, deleteUser, getUserListApi, updateUser } from '@/api/user';
 import { useI18n } from '@/hooks/web/useI18n';
 import { RoleModel } from '@/models/role';
 import { UserModel } from '@/models/user';
 import { useUserStore } from '@/store/modules/user';
 import { formatToDateTime } from '@/utils/date';
 import { Refresh } from '@vicons/tabler';
-import { FormInst, FormRules, NSwitch } from 'naive-ui';
+import { Edit, Plus, Trash } from '@vicons/tabler';
+import { cloneDeep, isEqual } from 'lodash-es';
+import {
+  FormInst,
+  FormRules,
+  NSwitch,
+  useDialog,
+  useMessage,
+  NSpace,
+  NTooltip,
+  NButton,
+  NIcon,
+  NDataTable,
+  DataTableColumn
+} from 'naive-ui';
 import { computed, h, onMounted, reactive, ref } from 'vue';
 
 const { t } = useI18n();
 
 const { userInfo } = useUserStore();
 
-const drawerActive = ref(false);
+const message = useMessage();
+const dialog = useDialog();
+
+const showDrawer = ref(false);
 const editFlag = ref(false);
+const submitting = ref(false);
+const oldData = ref<UserModel | null>(null);
+const loading = ref(false);
+const dataList = ref<UserModel[]>([]);
 
-const columns = [
-  {
-    title: 'ID',
-    key: 'id',
-    ifShow: false
-  },
-  {
-    title: t('views.system.users.form.email.label'),
-    key: 'email'
-  },
-  {
-    title: t('views.system.users.form.roles.label'),
-    key: 'roles',
-    render: (row: any) => row.roles.map((item: any) => item.name).join(',')
-  },
-  {
-    title: t('views.system.users.form.enabled.label'),
-    key: 'enabled',
-    render: (row: any) =>
-      row.id !== 1 && row.email !== userInfo?.email && h(NSwitch, { value: row.enabled })
-  },
-  {
-    title: t('global.table.columns.createdAt'),
-    key: 'created_at',
-    render: (row: any) => formatToDateTime(row.created_at)
-  }
-];
-
-const [registerTable, { reload }] = useTable({
-  api: getUserListApi,
-  columns,
-  showIndexColumn: true,
-  rowKey: (row: any) => row.id
+const pagination = reactive({
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  showSizePicker: true,
+  pageSizes: [10, 20, 50],
+  prefix: ({ itemCount }) => t('global.table.total', { total: itemCount })
 });
 
+const handlePageChange = (page: number) => {
+  pagination.page = page;
+  fetchData();
+};
+
+const handlePageSizeChange = (pageSize: number) => {
+  pagination.pageSize = pageSize;
+  pagination.page = 1;
+  fetchData();
+};
+
+const fetchData = async () => {
+  loading.value = true;
+  try {
+    const res: any = await getUserListApi({
+      page: pagination.page,
+      per_page: pagination.pageSize
+    });
+    if (res && res.items) {
+      dataList.value = res.items;
+      pagination.itemCount = res.count;
+    } else {
+      dataList.value = [];
+      pagination.itemCount = 0;
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const reload = () => {
+  fetchData();
+};
+
+const handleEdit = (row: UserModel) => {
+  editFlag.value = true;
+  Object.assign(formData, row);
+  // Backend returns roles as array of objects, need to map to ids for select
+  formData.roles = row.roles.map((r: any) => r.id);
+  // Store old data for change detection
+  oldData.value = cloneDeep(formData);
+  showDrawer.value = true;
+};
+
+const handleDelete = (row: UserModel) => {
+  dialog.warning({
+    title: t('global.dialog.warning.title'),
+    content: t('global.dialog.delete_confirm'),
+    positiveText: t('global.txt.confirm'),
+    negativeText: t('global.txt.cancel'),
+    onPositiveClick: async () => {
+      try {
+        await deleteUser(row.id!);
+        message.success(t('global.txt.operationSuccess'));
+        reload();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  });
+};
+
+const columns = computed<DataTableColumn<UserModel>[]>(() =>
+  [
+    {
+      title: 'ID',
+      key: 'id'
+    },
+    {
+      title: t('views.system.users.form.email.label'),
+      key: 'email'
+    },
+    {
+      title: t('views.system.users.form.roles.label'),
+      key: 'roles',
+      render: (row: any) => row.roles.map((item: any) => t(item.name, item.name)).join(',')
+    },
+    {
+      title: t('views.system.users.form.enabled.label'),
+      key: 'enabled',
+      render: (row: any) =>
+        row.id !== 1 &&
+        row.email !== userInfo?.email &&
+        h(NSwitch, { value: row.enabled, disabled: true }) // Disabled switch in list view usually, or implemented update logic. Previous code had just display.
+    },
+    {
+      title: t('global.table.columns.createdAt'),
+      key: 'created_at',
+      render: (row: any) => formatToDateTime(row.created_at)
+    },
+    {
+      title: t('global.table.columns.actions'),
+      key: 'actions',
+      width: 150,
+      render(row: any) {
+        if (row.id === 1) return null; // Admin cannot be operated
+        if (row.id === 1) return null; // Admin cannot be operated
+        const userStore = useUserStore();
+        const permissions = userStore.getPermissions;
+
+        const hasEdit = permissions.includes('system:user:edit') || permissions.includes('*:*:*');
+        const hasDelete =
+          permissions.includes('system:user:delete') || permissions.includes('*:*:*');
+
+        const buttons: any[] = [];
+        if (hasEdit) {
+          buttons.push(
+            h(
+              NTooltip,
+              { trigger: 'hover' },
+              {
+                trigger: () =>
+                  h(
+                    NButton,
+                    {
+                      size: 'small',
+                      type: 'primary',
+                      secondary: true,
+                      onClick: () => handleEdit(row)
+                    },
+                    { icon: () => h(NIcon, null, { default: () => h(Edit) }) }
+                  ),
+                default: () => t('global.txt.edit')
+              }
+            )
+          );
+        }
+
+        if (hasDelete) {
+          buttons.push(
+            h(
+              NTooltip,
+              { trigger: 'hover' },
+              {
+                trigger: () =>
+                  h(
+                    NButton,
+                    {
+                      size: 'small',
+                      type: 'error',
+                      secondary: true,
+                      onClick: () => handleDelete(row)
+                    },
+                    { icon: () => h(NIcon, null, { default: () => h(Trash) }) }
+                  ),
+                default: () => t('global.txt.delete')
+              }
+            )
+          );
+        }
+
+        return h(NSpace, null, {
+          default: () => buttons
+        });
+      }
+    }
+  ].filter((col) => col.key !== 'id')
+); // Filter out ID column effectively
+
 const handleClickAdd = () => {
-  drawerActive.value = true;
+  editFlag.value = false;
+  Object.assign(formData, defaultForm);
+  // Reset roles to empty array
+  formData.roles = [];
+  oldData.value = cloneDeep(formData);
+  showDrawer.value = true;
 };
 
 const roleOptions = ref<any[]>([]);
@@ -158,12 +351,52 @@ const formRules = computed((): FormRules => {
   };
 });
 
+const handleCancel = () => {
+  if (!isEqual(oldData.value, formData)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
+  }
+};
+
+const handleSubmit = (e: MouseEvent) => {
+  e.preventDefault();
+  formRef.value?.validate(async (errors) => {
+    if (!errors) {
+      submitting.value = true;
+      try {
+        if (editFlag.value) {
+          await updateUser(formData);
+        } else {
+          await createUser(formData);
+        }
+        message.success(t('global.txt.operationSuccess'));
+        showDrawer.value = false;
+        reload();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        submitting.value = false;
+      }
+    }
+  });
+};
+
 onMounted(async () => {
   const data = await getRoleOptions();
   roleOptions.value = data.map((item: RoleModel) => ({
-    label: item.name,
-    value: item.code
+    label: t(item.name, item.name),
+    value: item.id // Use ID as value
   }));
+  fetchData();
 });
 </script>
 
