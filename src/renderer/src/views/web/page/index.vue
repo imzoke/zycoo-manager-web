@@ -223,7 +223,6 @@ const rules: FormRules = {
 
       try {
         const valid = await checkPage({ id: formData.id, permalink: value });
-        console.log('valid', valid);
         if (!valid) {
           throw new Error(t('views.web.page.form.permalink.rules.unique'));
         }

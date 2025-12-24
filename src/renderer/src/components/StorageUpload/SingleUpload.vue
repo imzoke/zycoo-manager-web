@@ -5,7 +5,7 @@
         :multiple="false"
         :default-upload="false"
         :show-file-list="false"
-        accept=".zip,.tar,.gz,.rar,.7z,.iso,.bin,.exe,.msi,.dmg,.pkg,.apk"
+        accept=".zip,.tar,.gz,.rar,.7z,.iso,.bin,.exe,.msi,.dmg,.pkg,.apk,.pdf"
         class="upload-component"
         @change="handleFileChange"
       >

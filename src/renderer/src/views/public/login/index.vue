@@ -64,7 +64,6 @@ const handleSubmit = (e) => {
       const { email, password } = unref(formValue);
       try {
         const userInfo = await userStore.login({ email: email, password: password });
-        console.log('userInfo - ', userInfo);
 
         if (userInfo) {
           window.$notification.success({

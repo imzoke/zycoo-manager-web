@@ -444,7 +444,6 @@ const handleAdd = () => {
 };
 
 const handleEdit = (row: NewsModel) => {
-  console.log(row);
   isEditing.value = true;
   formData.id = row.id;
   formData.title = row.title;

@@ -139,7 +139,7 @@
 
         <template #footer>
           <n-flex justify="space-between" style="width: 100%">
-            <n-button @click="showDrawer = false">{{ t('global.txt.cancel') }}</n-button>
+            <n-button @click="handleCancel">{{ t('global.txt.cancel') }}</n-button>
             <n-button type="primary" :loading="submitting" @click="handleFormSubmit">
               {{ t('global.txt.submit') }}
             </n-button>
