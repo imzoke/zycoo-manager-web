@@ -10,6 +10,7 @@ import { darken, lighten } from './utils';
 import '@/styles/app.less';
 
 import 'ckeditor5/ckeditor5.css';
+import { setupPermissionDirective } from './directives/permission';
 
 const primaryColor = '#6044FF';
 const primaryColorHover: string = lighten(primaryColor, 6);
@@ -79,6 +80,8 @@ async function bootstrap(): Promise<void> {
   await setupI18n(app);
 
   await setupRouter(app);
+
+  setupPermissionDirective(app);
 
   setupRouterGuard(router);
 

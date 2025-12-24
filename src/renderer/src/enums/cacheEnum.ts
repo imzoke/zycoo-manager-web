@@ -9,6 +9,9 @@ export const USER_INFO_KEY = 'USER__INFO__';
 // role info key
 export const ROLES_KEY = 'ROLES__KEY__';
 
+// permissions info key
+export const PERMISSIONS_KEY = 'PERMISSIONS__KEY__';
+
 // base global local key
 export const APP_LOCAL_CACHE_KEY = 'COMMON__LOCAL__KEY__';
 

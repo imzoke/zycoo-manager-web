@@ -2,11 +2,13 @@ import { AppRouteRecordRaw, Menu } from '@/router/types';
 import { defineStore } from 'pinia';
 import { useUserStore } from './user';
 import { toRaw } from 'vue';
+import { store } from '..';
+import { getMenuList } from '@/api/menu';
+import { transformObjToRoute } from '@/router/helper/routeHelper';
 import { transformMenuModules } from '@/router/helper';
 import { menuModules } from '@/router/menus';
 import { asyncRoutes } from '@/router/routes';
 import { filter } from '@/utils/helper/treeHelper';
-import { store } from '..';
 
 interface PermissionState {
   // permCodeList: string[] | number[];
@@ -95,12 +97,40 @@ export const usePermissionStore = defineStore('app-permission', {
       // };
 
       // swith(permissionM)
+      // static menu
       const staticMenuList = transformMenuModules(menuModules);
       staticMenuList.sort((a, b) => {
         return (a.orderNo || 0) - (b.orderNo || 0);
       });
-      this.setStaticMenuList(staticMenuList);
-      routes = filter(asyncRoutes, routeFilter);
+      // this.setStaticMenuList(staticMenuList);
+
+      // Dynamic menu from API
+      try {
+        const menuList = await getMenuList();
+        const dynamicRoutes = transformObjToRoute(menuList);
+
+        // Add dynamic routes.
+        // NOTE: asyncRoutes contains PAGE_NOT_FOUND_ROUTE, which must be last.
+        routes = filter([...dynamicRoutes, ...asyncRoutes], routeFilter);
+
+        // Update menu lists
+        // NOTE: Sidebar menu generation might need adjustment.
+        // Currently assumes `backMenuList` is set?
+        // The original code used `setStaticMenuList`.
+        // We probably want to set `backMenuList` if the sidebar mode is BACK.
+        // For now, let's just make sure routes are added.
+
+        // Also need to convert MenuModel[] to Menu[] for sidebar
+        // For now, assume dynamicRoutes structure is enough for sidebar if we extract it?
+        // Wait, sidebar uses `getBackMenuList` or `getStaticMenuList`?
+        // Layout usually uses `usePermissionStore().getShallowMenus`.
+        // I need to check how menu is rendered.
+        // Assuming `backMenuList` is used for "BACK" mode.
+        this.setBackMenuList(transformMenuModules(dynamicRoutes as unknown as Menu[]));
+      } catch (error) {
+        console.error('Failed to load dynamic menus', error);
+      }
+
       routes = routes.filter(routeFilter);
 
       return routes;

@@ -8,8 +8,6 @@ import { pathToRegexp } from 'path-to-regexp';
 
 const modules = import.meta.glob('../routes/modules/**/*.ts', { eager: true });
 
-console.log(modules, 'modules');
-
 export const menuModules: MenuModule[] = [];
 
 Object.keys(modules).forEach((key) => {
@@ -29,7 +27,7 @@ async function getAsyncMenus() {
   //     return show
   //   })
   // }
-  return permissionStore.getStaticMenuList;
+  return permissionStore.getBackMenuList;
 }
 
 function basicFilter(routes: RouteRecordNormalized[]) {

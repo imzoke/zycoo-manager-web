@@ -1,5 +1,8 @@
 {
   "global": {
+    "role": {
+      "superAdmin": "超管"
+    },
     "txt": {
       "add": "新增",
       "cancel": "取消",
@@ -8,6 +11,8 @@
       "copy": "复制",
       "edit": "编辑",
 
+
+      "read": "查询",
       "search": "搜索",
 
       "preview": "预览",
@@ -754,6 +759,10 @@
               "required": "请输入代码"
             }
           }
+        },
+        "permission": {
+          "title": "分配权限",
+          "tooltip": "权限"
         }
       },
       "log": {
@@ -764,6 +773,58 @@
           "path": "路径",
           "status": "状态",
           "latency": "耗时"
+        }
+      },
+      "menu": {
+        "title": "菜单管理",
+        "add_title": "新增菜单",
+        "edit_title": "编辑菜单",
+        "deleteTip": "确定删除菜单“{name}”吗？",
+        "form": {
+          "name": {
+            "label": "菜单名称",
+            "placeholder": "请输入菜单名称",
+            "rules": {
+              "required": "请输入菜单名称"
+            }
+          },
+          "type": {
+            "label": "菜单类型",
+            "rules": {
+              "required": "请选择菜单类型"
+            }
+          },
+          "parent": {
+            "label": "上级菜单",
+            "placeholder": "请选择上级菜单"
+          },
+          "path": {
+            "label": "路由地址",
+            "placeholder": "请输入路由地址"
+          },
+          "component": {
+            "label": "组件路径",
+            "placeholder": "请输入组件路径"
+          },
+          "permission": {
+            "label": "权限标识",
+            "placeholder": "请输入权限标识"
+          },
+          "icon": {
+            "label": "图标",
+            "placeholder": "请输入图标名称"
+          },
+          "sort": {
+            "label": "排序"
+          },
+          "visible": {
+            "label": "是否可见"
+          }
+        },
+        "type": {
+          "directory": "目录",
+          "menu": "菜单",
+          "button": "按钮"
         }
       }
     }

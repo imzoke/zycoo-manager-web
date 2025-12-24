@@ -1,0 +1,1 @@
+<template><div class="p-4"><h2>Upload Demo</h2><Upload v-model:value="url" :max-width="800" prefix="demo" /><p class="mt-4">URL: {{ url }}</p></div></template><script setup lang="ts">import { ref } from "vue";import Upload from "./index.vue";const url = ref("");</script>

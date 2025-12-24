@@ -2,22 +2,12 @@ import { PageEnum } from '@/enums/pageEnum';
 import { AppRouteRecordRaw } from '../types';
 import { PAGE_NOT_FOUND_ROUTE } from './basic';
 
-const modules = import.meta.glob('./modules/**/*.ts', { eager: true });
-
-const routeModuleList: any[] = [];
-
-Object.keys(modules).forEach((key) => {
-  const mod = (modules[key] as any).default || {};
-  const modList = Array.isArray(mod) ? [...mod] : [mod];
-  routeModuleList.push(...modList);
-});
-
-export const asyncRoutes = [PAGE_NOT_FOUND_ROUTE, ...routeModuleList];
+export const asyncRoutes = [PAGE_NOT_FOUND_ROUTE];
 
 export const RootRoute: AppRouteRecordRaw = {
   path: '/',
   name: 'Root',
-  redirect: PageEnum.BASE_HOME,
+  redirect: PageEnum.BASE_LOGIN,
   meta: {
     title: 'Root'
   }
@@ -43,10 +33,4 @@ export const SolutionPreviewRoute: AppRouteRecordRaw = {
   }
 };
 
-export const basicRoutes = [
-  RootRoute,
-  LoginRoute,
-  PAGE_NOT_FOUND_ROUTE,
-  SolutionPreviewRoute,
-  ...routeModuleList
-];
+export const basicRoutes = [RootRoute, LoginRoute, PAGE_NOT_FOUND_ROUTE, SolutionPreviewRoute];

@@ -1,4 +1,4 @@
-import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
+import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY, PERMISSIONS_KEY } from '@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '@/utils/auth';
 import { defineStore } from 'pinia';
 import { store } from '@/store';
@@ -14,6 +14,7 @@ interface UserState {
   token?: string;
   userInfo: Nullable<UserInfo>;
   roles: any[];
+  permissions: string[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
 }
@@ -23,6 +24,7 @@ export const useUserStore = defineStore('app-user', {
     token: undefined,
     userInfo: null,
     roles: [],
+    permissions: [],
     sessionTimeout: false,
     lastUpdateTime: 0
   }),
@@ -35,6 +37,11 @@ export const useUserStore = defineStore('app-user', {
     },
     getRoles(): any[] {
       return this.roles.length > 0 ? this.roles : getAuthCache<any[]>(ROLES_KEY);
+    },
+    getPermissions(): string[] {
+      return this.permissions.length > 0
+        ? this.permissions
+        : getAuthCache<string[]>(PERMISSIONS_KEY);
     },
     getSessionTimeout(): boolean {
       return !!this.sessionTimeout;
@@ -57,6 +64,10 @@ export const useUserStore = defineStore('app-user', {
       this.roles = roles;
       setAuthCache(ROLES_KEY, roles);
     },
+    setPermissions(permissions: string[]) {
+      this.permissions = permissions;
+      setAuthCache(PERMISSIONS_KEY, permissions);
+    },
     setSessionTimeout(flag: boolean) {
       this.sessionTimeout = flag;
     },
@@ -65,6 +76,7 @@ export const useUserStore = defineStore('app-user', {
       this.setToken(undefined);
       this.setUserInfo(null);
       this.setRoleList([]);
+      this.setPermissions([]);
       this.setSessionTimeout(false);
     },
 
@@ -84,10 +96,7 @@ export const useUserStore = defineStore('app-user', {
     },
 
     async afterLoginAction(): Promise<UserInfo | null> {
-      console.log('afterLoginAction 1');
-
       if (!this.getToken) return null;
-      console.log('afterLoginAction 2');
 
       //
       const userInfo = await this.getUserInfoAction();
@@ -114,8 +123,9 @@ export const useUserStore = defineStore('app-user', {
       if (!this.getToken) return null;
       try {
         const userInfo = await getUserInfoApi();
-        const { roles } = userInfo;
+        const { roles, permissions } = userInfo;
         this.setRoleList(roles);
+        this.setPermissions(permissions || []);
         this.setUserInfo(userInfo);
         return userInfo;
       } catch (err) {
@@ -127,7 +137,9 @@ export const useUserStore = defineStore('app-user', {
     },
 
     async logout() {
+      const permissionStore = usePermissionStore();
       this.resetState();
+      permissionStore.resetState();
       router.replace('/login');
     }
   }

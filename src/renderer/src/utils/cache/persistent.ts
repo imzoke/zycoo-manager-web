@@ -6,7 +6,8 @@ import {
   USER_INFO_KEY,
   APP_LOCAL_CACHE_KEY,
   APP_SESSION_CACHE_KEY,
-  ROLES_KEY
+  ROLES_KEY,
+  PERMISSIONS_KEY
 } from '@/enums/cacheEnum';
 import { createLocalStorage, createSessionStorage } from '@/utils/cache';
 import { DEFAULT_CACHE_TIME } from '@/settings/encryptionSetting';
@@ -17,6 +18,7 @@ interface BasicStore {
   [TOKEN_KEY]: string | number | null | undefined;
   [USER_INFO_KEY]: string;
   [ROLES_KEY]: string;
+  [PERMISSIONS_KEY]: string;
 }
 
 type LocalStore = BasicStore;

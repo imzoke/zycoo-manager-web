@@ -39,3 +39,11 @@ export const deleteRole = (id: number) => {
 export const checkRole = (params: { code: string; id?: number }) => {
   return defHttp.get<boolean>({ url: Api.Check, params });
 };
+
+export const getRoleMenus = (id: number) => {
+  return defHttp.get<number[]>({ url: `${Api.Base}/${id}/menus` });
+};
+
+export const assignRolePermissions = (id: number, menu_ids: number[]) => {
+  return defHttp.post<void>({ url: `${Api.Base}/${id}/menus`, data: { menu_ids } });
+};

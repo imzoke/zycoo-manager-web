@@ -6,7 +6,7 @@
         <n-space>
           <n-tooltip>
             <template #trigger>
-              <n-button type="primary" @click="handleAdd">
+              <n-button v-permission="['system:role:add']" type="primary" @click="handleAdd">
                 <template #icon>
                   <n-icon>
                     <Plus />
@@ -37,7 +37,14 @@
 
     <n-data-table :columns="columns" :data="dataList" :loading="loading" />
 
-    <n-drawer v-model:show="drawerActive" width="500px">
+    <n-drawer
+      v-model:show="showDrawer"
+      width="500px"
+      :auto-focus="false"
+      :close-on-esc="false"
+      :trap-focus="false"
+      :on-update:show="handleCancel"
+    >
       <n-drawer-content :native-scrollbar="false" closable>
         <template #header>
           {{ t(`global.drawer.title.${editFlag ? 'edit' : 'add'}`) }}
@@ -60,10 +67,8 @@
         </template>
 
         <template #footer>
-          <n-flex>
-            <n-button @click="drawerActive = false">
-              {{ t('global.txt.cancel') }}
-            </n-button>
+          <n-flex justify="space-between" style="width: 100%">
+            <n-button @click="handleCancel">{{ t('global.txt.cancel') }}</n-button>
             <n-button type="primary" :loading="submitting" @click="handleSubmit">
               {{ t('global.txt.submit') }}
             </n-button>
@@ -71,6 +76,40 @@
         </template>
       </n-drawer-content>
     </n-drawer>
+
+    <!-- Permission Modal -->
+    <n-modal
+      v-model:show="permModalVisible"
+      :title="t('views.system.roles.permission.title')"
+      preset="card"
+      style="width: 600px"
+    >
+      <div v-if="permLoading" style="text-align: center; padding: 20px">
+        <n-spin />
+      </div>
+      <n-tree
+        v-else
+        block-line
+        checkable
+        cascade
+        default-expand-all
+        :data="menuTree"
+        :checked-keys="checkedKeys"
+        key-field="id"
+        label-field="name"
+        :render-label="renderLabel"
+        children-field="children"
+        @update:checked-keys="handleCheck"
+      />
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="permModalVisible = false">{{ t('global.txt.cancel') }}</n-button>
+          <n-button type="primary" :loading="permSubmitting" @click="handlePermSubmit">
+            {{ t('global.txt.confirm') }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-modal>
   </div>
 </template>
 
@@ -89,11 +128,27 @@ import {
   useMessage,
   useDialog,
   DataTableColumn,
-  NTooltip
+  NTooltip,
+  NModal,
+  NTree,
+  NSpin,
+  NInputGroup,
+  NFlex,
+  NText
 } from 'naive-ui';
-import { Plus, Edit, Trash, Search } from '@vicons/tabler';
-import { getRoleList, createRole, updateRole, deleteRole, RoleModel } from '@/api/role';
+import { Plus, Edit, Trash, Search, Lock } from '@vicons/tabler';
+import {
+  getRoleList,
+  createRole,
+  updateRole,
+  deleteRole,
+  RoleModel,
+  getRoleMenus,
+  assignRolePermissions
+} from '@/api/role';
+import { getMenuList, MenuModel } from '@/api/menu';
 import { useI18n } from '@/hooks/web/useI18n';
+import { cloneDeep, isEqual } from 'lodash-es';
 
 const { t } = useI18n();
 
@@ -104,10 +159,18 @@ const loading = ref(false);
 const dataList = ref<RoleModel[]>([]);
 const searchText = ref('');
 
-const drawerActive = ref(false);
+const showDrawer = ref(false);
 const editFlag = ref(false);
 const submitting = ref(false);
 const formRef = ref<any>(null);
+
+// Permission related
+const permModalVisible = ref(false);
+const permLoading = ref(false);
+const permSubmitting = ref(false);
+const currentRoleId = ref<number>(0);
+const menuTree = ref<MenuModel[]>([]);
+const checkedKeys = ref<number[]>([]);
 
 interface FormData {
   id?: number;
@@ -119,6 +182,8 @@ const formData = reactive<FormData>({
   name: '',
   code: ''
 });
+
+const originalFormData = ref(cloneDeep(formData));
 
 const rules = {
   name: {
@@ -134,12 +199,18 @@ const rules = {
 };
 
 const columns: DataTableColumn<RoleModel>[] = [
-  { title: t('global.table.columns.name'), key: 'name' },
+  {
+    title: t('global.table.columns.name'),
+    key: 'name',
+    render(row) {
+      return h(NText, null, { default: () => t(row.name) });
+    }
+  },
   { title: t('global.table.columns.code'), key: 'code' },
   {
     title: t('global.table.columns.actions'),
     key: 'actions',
-    width: 150,
+    width: 200,
     render(row) {
       return h(NSpace, null, {
         default: () => [
@@ -170,6 +241,24 @@ const columns: DataTableColumn<RoleModel>[] = [
                   NButton,
                   {
                     size: 'small',
+                    type: 'info',
+                    secondary: true,
+                    onClick: () => handlePermission(row)
+                  },
+                  { icon: () => h(NIcon, null, { default: () => h(Lock) }) }
+                ),
+              default: () => t('views.system.roles.permission.tooltip')
+            }
+          ),
+          h(
+            NTooltip,
+            { trigger: 'hover' },
+            {
+              trigger: () =>
+                h(
+                  NButton,
+                  {
+                    size: 'small',
                     type: 'error',
                     secondary: true,
                     onClick: () => handleDelete(row)
@@ -188,18 +277,11 @@ const columns: DataTableColumn<RoleModel>[] = [
 const fetchData = async () => {
   loading.value = true;
   try {
-    // The API might expect 'value' for search, or check if params structure matches
-    // getRoleList accepts params. If backend uses 'value' for comparison, pass it.
-    // Based on user/index.vue usage, often list APIs take { page, per_page, ... }
-    // but the getRoleList I implemented just passes params.
-    // Backend handler: queryMap["value"] = req.Value
     const res: any = await getRoleList({ value: searchText.value });
-    // Handle both array or paginated response format
     if (Array.isArray(res)) {
       dataList.value = res;
     } else if (res && res.items) {
       dataList.value = res.items;
-      // Handle total if needed for pagination
     } else {
       dataList.value = [];
     }
@@ -215,7 +297,10 @@ const handleAdd = () => {
   formData.id = undefined;
   formData.name = '';
   formData.code = '';
-  drawerActive.value = true;
+
+  originalFormData.value = cloneDeep(formData);
+
+  showDrawer.value = true;
 };
 
 const handleEdit = (row: RoleModel) => {
@@ -223,7 +308,26 @@ const handleEdit = (row: RoleModel) => {
   formData.id = row.id;
   formData.name = row.name;
   formData.code = row.code;
-  drawerActive.value = true;
+
+  originalFormData.value = cloneDeep(formData);
+
+  showDrawer.value = true;
+};
+
+const handleCancel = () => {
+  if (!isEqual(formData, originalFormData.value)) {
+    dialog.warning({
+      title: t('global.txt.warning'),
+      content: t('global.txt.closeTip'),
+      positiveText: t('global.txt.confirm'),
+      negativeText: t('global.txt.cancel'),
+      onPositiveClick: () => {
+        showDrawer.value = false;
+      }
+    });
+  } else {
+    showDrawer.value = false;
+  }
 };
 
 const handleSubmit = () => {
@@ -238,11 +342,10 @@ const handleSubmit = () => {
           await createRole({ name: formData.name, code: formData.code });
           message.success(t('global.txt.createSuccess'));
         }
-        drawerActive.value = false;
+        showDrawer.value = false;
         fetchData();
       } catch (error) {
         console.error(error);
-        // message.error('Operation failed'); // axios interceptor might handle this
       } finally {
         submitting.value = false;
       }
@@ -266,6 +369,50 @@ const handleDelete = (row: RoleModel) => {
       }
     }
   });
+};
+
+// --- Permission Logic ---
+const handlePermission = async (row: RoleModel) => {
+  currentRoleId.value = row.id;
+  permModalVisible.value = true;
+  permLoading.value = true;
+  try {
+    // Load all menus
+    const menus = await getMenuList();
+    menuTree.value = menus;
+
+    // Load assigned menus
+    const assignedIds = await getRoleMenus(row.id);
+    checkedKeys.value = assignedIds;
+  } catch (e: any) {
+    message.error(e.message || t('global.txt.operationFailed'));
+  } finally {
+    permLoading.value = false;
+  }
+};
+
+const handleCheck = (keys: number[]) => {
+  checkedKeys.value = keys;
+};
+
+const handlePermSubmit = async () => {
+  permSubmitting.value = true;
+  try {
+    // If cascade is used, checkedKeys includes parent nodes if fully checked.
+    // Backend logic might want all explicitly checked nodes.
+    // NTree checked-keys usually returns what is visibly checked.
+    await assignRolePermissions(currentRoleId.value, checkedKeys.value);
+    message.success(t('global.txt.operationSuccess'));
+    permModalVisible.value = false;
+  } catch (e: any) {
+    message.error(e.message || t('global.txt.operationFailed'));
+  } finally {
+    permSubmitting.value = false;
+  }
+};
+
+const renderLabel = ({ option }: { option: any }) => {
+  return t(option.name);
 };
 
 onMounted(() => {
