@@ -11,9 +11,14 @@
       "copy": "复制",
       "edit": "编辑",
 
+      "changePassword": "修改密码",
+      "logout": "退出登录",
 
       "read": "查询",
+
       "search": "搜索",
+
+      "refresh": "刷新",
 
       "preview": "预览",
 
@@ -47,10 +52,23 @@
       "clipboardNotSupported": "剪贴板不支持",
       "totalFiles": "共 {n} 个文件",
       "readyToUpload": "准备上传 {n} 个",
+      "operationSuccess": "操作成功",
+      "operationFailed": "操作失败",
 
       "warning": "警告",
       "closeTip": "当前有修改未保存，确定关闭吗？",
       "confirm": "确定",
+      "systemInfo": "系统信息",
+      "os": "系统",
+      "platform": "平台",
+      "uptime": "运行时间",
+      "cpu": "CPU",
+      "memory": "内存",
+      "disk": "磁盘",
+      "network": "网络",
+      "cores": "核心",
+      "sent": "发送",
+      "recv": "接收",
 
       "folder": "文件夹"
     },

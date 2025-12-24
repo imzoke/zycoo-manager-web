@@ -1,17 +1,30 @@
 <template>
   <n-layout has-sider style="height: 100vh">
-    <n-layout-sider bordered>
+    <n-layout-sider
+      bordered
+      collapse-mode="width"
+      :collapsed-width="64"
+      :width="240"
+      :collapsed="collapsed"
+      show-trigger
+      @collapse="collapsed = true"
+      @expand="collapsed = false"
+    >
       <div class="app-brand"></div>
       <n-scrollbar style="height: calc(100% - 57px)">
         <n-menu
+          :accordion="true"
           :options="menuOptions"
+          :collapsed="collapsed"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
           :default-expanded-keys="openKeys"
           :value="getSelectedKeys"
           @update:value="handleClickMenuItem"
         ></n-menu>
       </n-scrollbar>
       <div class="footer">
-        <AppUser />
+        <AppUser :collapsed="collapsed" />
       </div>
     </n-layout-sider>
 
@@ -40,6 +53,8 @@ import { useRoute } from 'vue-router';
 const { t } = useI18n();
 
 const currentRoute = useRoute();
+
+const collapsed = ref(false);
 
 const menus = ref<any[]>([]);
 const menuOptions = ref<any[]>([]);
@@ -70,9 +85,10 @@ watch(
 
 async function genMenus() {
   const result = await getMenus();
+  // console.log('result', result);
   menus.value = sortMenus(result);
 
-  console.log('menus.value', menus.value);
+  // console.log('menus.value', menus.value);
 
   menuOptions.value = menus.value.map((item) => {
     return {
@@ -89,7 +105,7 @@ async function genMenus() {
     };
   });
 
-  console.log('menuOptions', menuOptions.value);
+  // console.log('menuOptions', menuOptions.value);
 }
 
 function sortMenus(menus: any[] = []) {
@@ -115,7 +131,7 @@ async function initMenuOptions() {
 
 // 点击菜单
 function handleClickMenuItem(key: string) {
-  console.log('click', key);
+  // console.log('click', key);
 
   if (/http(s)?:/.test(key)) {
     window.open(key);
@@ -131,7 +147,10 @@ onMounted(async () => {
 
 <style lang="less" scoped>
 .footer {
+  display: flex;
+  align-items: center;
   max-width: 100%;
+  height: 36px;
   padding: 10px;
   border-top: 1px solid #f3f4f5;
 }
